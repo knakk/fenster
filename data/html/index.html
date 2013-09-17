@@ -14,11 +14,49 @@
 
 <body>
 
-  <p>Hello</p>
+  <h3>&lt;{{.URI}}&gt; as subject</h3>
+  <table>
+  <thead>
+    </tr>
+      <td>GRAPH</td>
+      <td>PREDICATE</td>
+      <td>OBJECT</td>
+    </tr>
+  </thead>
+  <tbody>
+  {{range $el := .AsSubject}}
+    <tr>
+      <td>{{$el.g}}</td>
+      <td>{{$el.p}}</td>
+      <td>{{$el.o}}</td>
+    </tr>
+  {{end}}
+  </tbody>
+  </table>
+
+  <h3>&lt;{{.URI}}&gt; as object</h3>
+  <table>
+  <thead>
+    </tr>
+      <td>GRAPH</td>
+      <td>SUBJECT</td>
+      <td>PREDICATE</td>
+    </tr>
+  </thead>
+  <tbody>
+  {{range $el := .AsObject}}
+    <tr>
+      <td>{{$el.g}}</td>
+      <td>{{$el.s}}</td>
+      <td>{{$el.p}}</td>
+    </tr>
+  {{end}}
+  </tbody>
+  </table>
 
   <script src="js/scripts.js"></script>
 </body>
 <footer>
-  {{.Name}} version {{.Version}}
+  <p>{{.Name}} version {{.Version}}</p>
 </footer>
 </html>
