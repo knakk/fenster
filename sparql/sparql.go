@@ -52,11 +52,11 @@ func Query(endpoint string, query string, open time.Duration, read time.Duration
 
 	client := newTimeoutClient(open, read)
 	resp, err := client.Do(req)
-	defer resp.Body.Close()
-
 	if err != nil {
-		return nil, fmt.Errorf("http request failed: %v", err)
+		return nil, fmt.Errorf("http request failed or timed out: %v", err)
 	}
+
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("http request failed with status code: %v", resp.StatusCode)
