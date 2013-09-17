@@ -8,55 +8,58 @@
   <meta name="description" content="RDF quad-store frontend">
   <meta name="author" content="Knakk!">
 
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="/css/styles.css">
 
 </head>
 
 <body>
 
-  <h3>&lt;{{.URI}}&gt; as subject</h3>
-  <table>
-  <thead>
-    </tr>
-      <td>GRAPH</td>
-      <td>PREDICATE</td>
-      <td>OBJECT</td>
-    </tr>
-  </thead>
-  <tbody>
-  {{range $el := .AsSubject}}
-    <tr>
-      <td>{{$el.g}}</td>
-      <td>{{$el.p}}</td>
-      <td>{{$el.o}}</td>
-    </tr>
-  {{end}}
-  </tbody>
-  </table>
+  <div id="container">
+    <h2>&lt;{{.URI}}&gt;</h2>
 
-  <h3>&lt;{{.URI}}&gt; as object</h3>
-  <table>
-  <thead>
-    </tr>
-      <td>GRAPH</td>
-      <td>SUBJECT</td>
-      <td>PREDICATE</td>
-    </tr>
-  </thead>
-  <tbody>
-  {{range $el := .AsObject}}
-    <tr>
-      <td>{{$el.g}}</td>
-      <td>{{$el.s}}</td>
-      <td>{{$el.p}}</td>
-    </tr>
-  {{end}}
-  </tbody>
-  </table>
+    <h3>Resource as subject</h3>
+    <table class="quads">
+    <thead>
+      </tr>
+        <td>GRAPH</td>
+        <td>PREDICATE</td>
+        <td>OBJECT</td>
+      </tr>
+    </thead>
+    <tbody>
+    {{range $el := .AsSubject}}
+      <tr>
+        <td>{{$el.g}}</td>
+        <td>{{$el.p}}</td>
+        <td>{{$el.o}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+    </table>
 
+    <h3>Resource as object</h3>
+    <table class="quads">
+    <thead>
+      </tr>
+        <td>GRAPH</td>
+        <td>SUBJECT</td>
+        <td>PREDICATE</td>
+      </tr>
+    </thead>
+    <tbody>
+    {{range $el := .AsObject}}
+      <tr>
+        <td>{{$el.g}}</td>
+        <td>{{$el.s}}</td>
+        <td>{{$el.p}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+    </table>
+  </div>
   <script src="js/scripts.js"></script>
 </body>
 <footer>
-  <p>{{.Name}} version {{.Version}}</p>
+  <p>{{.Name}} version {{.Version}} by <a href="https://github.com/knakk">Knakk! technologies</a></p>
 </footer>
 </html>

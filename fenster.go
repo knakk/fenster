@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	version = "0.0"
+	version = "0.1"
 	query   = `
 		SELECT * 
 		WHERE
@@ -88,8 +88,8 @@ func serveFile(filename string) func(w http.ResponseWriter, r *http.Request) {
 func main() {
 	mux := http.NewServeMux()
 	var handler mainHandler
-	mux.HandleFunc("/css/styles.css", serveFile("data/css/styles.css"))
 	mux.HandleFunc("/robots.txt", serveFile("data/robots.txt"))
+	mux.HandleFunc("/css/styles.css", serveFile("data/css/styles.css"))
 	mux.Handle("/", handler)
 
 	fmt.Println("Listening on localhost:4000 ...")
