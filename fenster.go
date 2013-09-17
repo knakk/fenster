@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/BurntSushi/toml"
 	"github.com/knakk/fenster/rdf"
 	"github.com/knakk/fenster/sparql"
 )
@@ -28,6 +30,7 @@ const (
 )
 
 var templates = template.Must(template.ParseFiles("data/html/index.html"))
+var conf Config
 
 type mainHandler struct{}
 
@@ -37,11 +40,11 @@ func rejectWhereEmpty(key string, rdfMap []map[string]rdf.Term) *[]map[string]in
 		if m[key] != nil {
 			tm := make(map[string]interface{})
 			for k, v := range m {
-				if k != "g" && strings.HasPrefix(v.String(), "<http://data.deichman.no/") {
-					link := fmt.Sprintf("<a href='/%v'>%v</a>", v.String()[25:len(v.String())-1], template.HTMLEscapeString(v.String()))
+				if k != "g" && k != "p" && strings.HasPrefix(v.String(), "<http://data.deichman.no/") {
+					link := fmt.Sprintf("<a href='/%v'>%v</a>", v.String()[25:len(v.String())-1], template.HTMLEscapeString(prefixify(v.String())))
 					tm[k] = template.HTML(link)
 				} else {
-					tm[k] = v.String()
+					tm[k] = prefixify(v.String())
 				}
 			}
 			included = append(included, tm)
@@ -50,11 +53,20 @@ func rejectWhereEmpty(key string, rdfMap []map[string]rdf.Term) *[]map[string]in
 	return &included
 }
 
+func prefixify(uri string) string {
+	for _, prefixPair := range conf.Vocab.Dict {
+		if strings.HasPrefix(uri, "<"+prefixPair[1]) {
+			return strings.Replace(uri, prefixPair[1], "<"+prefixPair[0]+":", 1)[1:]
+		}
+	}
+	return uri
+}
+
 func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	uri := "http://data.deichman.no" + r.URL.Path
 	q := fmt.Sprintf(query, uri, uri)
-	res, err := sparql.Query("http://marc2rdf.deichman.no/sparql", q, 250*time.Millisecond, 500*time.Millisecond)
+	res, err := sparql.Query(conf.QuadStore.Endpoint, q, 250*time.Millisecond, 500*time.Millisecond)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -82,6 +94,12 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func serveFile(filename string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filename)
+	}
+}
+
+func init() {
+	if _, err := toml.DecodeFile("config.ini", &conf); err != nil {
+		log.Fatal("Couldn't parse config file: ", err)
 	}
 }
 
