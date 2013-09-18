@@ -53,10 +53,17 @@ func rejectWhereEmpty(key string, rdfMap []map[string]rdf.Term) *[]map[string]in
 	return &included
 }
 
+func trimSuffix(s, suffix string) string {
+	if strings.HasSuffix(s, suffix) {
+		s = s[:len(s)-len(suffix)]
+	}
+	return s
+}
+
 func prefixify(uri string) string {
 	for _, prefixPair := range conf.Vocab.Dict {
 		if strings.HasPrefix(uri, "<"+prefixPair[1]) {
-			return strings.Replace(uri, prefixPair[1], "<"+prefixPair[0]+":", 1)[1:]
+			return trimSuffix(strings.Replace(uri, prefixPair[1], prefixPair[0]+":", 1)[1:], ">")
 		}
 	}
 	return uri
