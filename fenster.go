@@ -97,6 +97,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		AsSubject          *[]map[string]interface{}
 		AsObject           *[]map[string]interface{}
 		Images             []template.HTML
+		ShortURI           string
 	}{
 		"Fenster",
 		string(version),
@@ -104,6 +105,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		rejectWhereEmpty("o", res.Solutions()),
 		rejectWhereEmpty("s", res.Solutions()),
 		findImages(res.Solutions()),
+		prefixify("<" + uri + ">"),
 	}
 
 	err = templates.ExecuteTemplate(w, "index.html", data)

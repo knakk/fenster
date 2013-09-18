@@ -3,11 +3,13 @@ article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section,su
 
 body { font-family: monospace;}
 
-h3 { background-color: #549908; padding: 3px;}
+h3 { background-color: #549908; padding: 3px; color: #fff;}
+.black { color: #000;}
 footer { padding: 2em;}
 #container { padding: 1em; margin: auto; max-width:1000px;}
 li.image { display:inline-block; margin: 2em; }
 img { max-height: 300px;}
+table.quads { width: 100%;}
 table.quads thead { font-weight: bold }
 table.quads tr:nth-of-type(even) { background-color: #ddd; }
 table.quads td { padding: 4px 20px 4px 6px;}
