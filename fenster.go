@@ -62,6 +62,19 @@ func prefixify(uri string) string {
 	return uri
 }
 
+func findImages(rdfMap []map[string]rdf.Term) []template.HTML {
+	images := make([]template.HTML, 0)
+	if !conf.UI.ShowImages {
+		return images
+	}
+	for _, m := range rdfMap {
+		if m["p"].String() == "<http://xmlns.com/foaf/0.1/depiction>" {
+			images = append(images, template.HTML("<img src=\""+m["o"].String()[1:len(m["o"].String())-1]+"\">"))
+		}
+	}
+	return images
+}
+
 func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	uri := "http://data.deichman.no" + r.URL.Path
@@ -76,12 +89,14 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Name, Version, URI string
 		AsSubject          *[]map[string]interface{}
 		AsObject           *[]map[string]interface{}
+		Images             []template.HTML
 	}{
 		"Fenster",
 		string(version),
 		uri,
 		rejectWhereEmpty("o", res.Solutions()),
 		rejectWhereEmpty("s", res.Solutions()),
+		findImages(res.Solutions()),
 	}
 
 	err = templates.ExecuteTemplate(w, "index.html", data)
