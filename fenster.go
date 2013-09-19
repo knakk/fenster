@@ -87,15 +87,15 @@ func findTitle(uri string, rdfMap *[]map[string]rdf.Term) string {
 	return uri
 }
 
-func findImages(rdfMap *[]map[string]rdf.Term) []template.HTML {
-	images := make([]template.HTML, 0)
+func findImages(rdfMap *[]map[string]rdf.Term) []string {
+	images := make([]string, 0)
 	if !conf.UI.ShowImages {
 		return images
 	}
 	for _, m := range *rdfMap {
 		for _, p := range conf.UI.ImagePredicates {
 			if m["p"].String() == "<"+p+">" {
-				images = append(images, template.HTML("<img src=\""+m["o"].String()[1:len(m["o"].String())-1]+"\">"))
+				images = append(images, trimSuffix(m["o"].String()[1:], ">"))
 				if len(images) == conf.UI.NumImages {
 					return images
 				}
@@ -144,7 +144,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Name, Version, URI string
 		AsSubject          *[]map[string]interface{}
 		AsObject           *[]map[string]interface{}
-		Images             []template.HTML
+		Images             []string
 		ShortURI           string
 	}{
 		findTitle(uri, &solutions),
