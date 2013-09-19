@@ -138,12 +138,15 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	solutions := res.Solutions()
-
+	subj := rejectWhereEmpty("o", &solutions)
+	obj := rejectWhereEmpty("s", &solutions)
 	data := struct {
 		Title              string
 		Name, Version, URI string
 		AsSubject          *[]map[string]interface{}
 		AsObject           *[]map[string]interface{}
+		AsSubjectSize      int
+		AsObjectSize       int
 		Images             []string
 		ShortURI           string
 	}{
@@ -151,8 +154,10 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		"Fenster",
 		string(version),
 		uri,
-		rejectWhereEmpty("o", &solutions),
-		rejectWhereEmpty("s", &solutions),
+		subj,
+		obj,
+		len(*subj) - 1,
+		len(*obj) - 1,
 		findImages(&solutions),
 		prefixify("<" + uri + ">"),
 	}
