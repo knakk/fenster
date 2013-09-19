@@ -34,9 +34,9 @@ var conf Config
 
 type mainHandler struct{}
 
-func rejectWhereEmpty(key string, rdfMap []map[string]rdf.Term) *[]map[string]interface{} {
+func rejectWhereEmpty(key string, rdfMap *[]map[string]rdf.Term) *[]map[string]interface{} {
 	included := make([]map[string]interface{}, 1)
-	for _, m := range rdfMap {
+	for _, m := range *rdfMap {
 		if m[key] != nil {
 			tm := make(map[string]interface{})
 			for k, v := range m {
@@ -72,12 +72,12 @@ func prefixify(uri string) string {
 	return uri
 }
 
-func findTitle(uri string, rdfMap []map[string]rdf.Term) string {
+func findTitle(uri string, rdfMap *[]map[string]rdf.Term) string {
 	if len(conf.UI.TitlePredicates) == 0 {
 		return uri
 	}
 
-	for _, m := range rdfMap {
+	for _, m := range *rdfMap {
 		for _, p := range conf.UI.TitlePredicates {
 			if m["p"].String() == "<"+p+">" {
 				return m["o"].String()
@@ -87,12 +87,12 @@ func findTitle(uri string, rdfMap []map[string]rdf.Term) string {
 	return uri
 }
 
-func findImages(rdfMap []map[string]rdf.Term) []template.HTML {
+func findImages(rdfMap *[]map[string]rdf.Term) []template.HTML {
 	images := make([]template.HTML, 0)
 	if !conf.UI.ShowImages {
 		return images
 	}
-	for _, m := range rdfMap {
+	for _, m := range *rdfMap {
 		for _, p := range conf.UI.ImagePredicates {
 			if m["p"].String() == "<"+p+">" {
 				images = append(images, template.HTML("<img src=\""+m["o"].String()[1:len(m["o"].String())-1]+"\">"))
@@ -116,6 +116,8 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	solutions := res.Solutions()
+
 	data := struct {
 		Title              string
 		Name, Version, URI string
@@ -124,13 +126,13 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Images             []template.HTML
 		ShortURI           string
 	}{
-		findTitle(uri, res.Solutions()),
+		findTitle(uri, &solutions),
 		"Fenster",
 		string(version),
 		uri,
-		rejectWhereEmpty("o", res.Solutions()),
-		rejectWhereEmpty("s", res.Solutions()),
-		findImages(res.Solutions()),
+		rejectWhereEmpty("o", &solutions),
+		rejectWhereEmpty("s", &solutions),
+		findImages(&solutions),
 		prefixify("<" + uri + ">"),
 	}
 
