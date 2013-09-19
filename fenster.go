@@ -40,7 +40,7 @@ func rejectWhereEmpty(key string, rdfMap []map[string]rdf.Term) *[]map[string]in
 		if m[key] != nil {
 			tm := make(map[string]interface{})
 			for k, v := range m {
-				if k != "g" && k != "p" && strings.HasPrefix(v.String(), "<http://data.deichman.no/") {
+				if k != "g" && k != "p" && strings.HasPrefix(v.String(), "<"+conf.BaseURI) {
 					link := fmt.Sprintf("<a href='/%v'>%v</a>", v.String()[25:len(v.String())-1], template.HTMLEscapeString(prefixify(v.String())))
 					tm[k] = template.HTML(link)
 				} else {
@@ -61,9 +61,27 @@ func trimSuffix(s, suffix string) string {
 }
 
 func prefixify(uri string) string {
+	if !conf.Vocab.Enabled {
+		return uri
+	}
 	for _, prefixPair := range conf.Vocab.Dict {
 		if strings.HasPrefix(uri, "<"+prefixPair[1]) {
 			return trimSuffix(strings.Replace(uri, prefixPair[1], prefixPair[0]+":", 1)[1:], ">")
+		}
+	}
+	return uri
+}
+
+func findTitle(uri string, rdfMap []map[string]rdf.Term) string {
+	if len(conf.UI.TitlePredicates) == 0 {
+		return uri
+	}
+
+	for _, m := range rdfMap {
+		for _, p := range conf.UI.TitlePredicates {
+			if m["p"].String() == "<"+p+">" {
+				return m["o"].String()
+			}
 		}
 	}
 	return uri
@@ -75,8 +93,13 @@ func findImages(rdfMap []map[string]rdf.Term) []template.HTML {
 		return images
 	}
 	for _, m := range rdfMap {
-		if m["p"].String() == "<http://xmlns.com/foaf/0.1/depiction>" {
-			images = append(images, template.HTML("<img src=\""+m["o"].String()[1:len(m["o"].String())-1]+"\">"))
+		for _, p := range conf.UI.ImagePredicates {
+			if m["p"].String() == "<"+p+">" {
+				images = append(images, template.HTML("<img src=\""+m["o"].String()[1:len(m["o"].String())-1]+"\">"))
+				if len(images) == conf.UI.NumImages {
+					return images
+				}
+			}
 		}
 	}
 	return images
@@ -84,21 +107,24 @@ func findImages(rdfMap []map[string]rdf.Term) []template.HTML {
 
 func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	uri := "http://data.deichman.no" + r.URL.Path
+	uri := conf.BaseURI + r.URL.Path
 	q := fmt.Sprintf(query, uri, uri)
-	res, err := sparql.Query(conf.QuadStore.Endpoint, q, 250*time.Millisecond, 500*time.Millisecond)
+	res, err := sparql.Query(conf.QuadStore.Endpoint, q,
+		time.Duration(conf.QuadStore.OpenTimeout)*time.Millisecond, time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	data := struct {
+		Title              string
 		Name, Version, URI string
 		AsSubject          *[]map[string]interface{}
 		AsObject           *[]map[string]interface{}
 		Images             []template.HTML
 		ShortURI           string
 	}{
+		findTitle(uri, res.Solutions()),
 		"Fenster",
 		string(version),
 		uri,
@@ -134,6 +160,6 @@ func main() {
 	mux.HandleFunc("/css/styles.css", serveFile("data/css/styles.css"))
 	mux.Handle("/", handler)
 
-	fmt.Println("Listening on localhost:4000 ...")
-	http.ListenAndServe("localhost:4000", mux)
+	fmt.Printf("Listening on port %d ...\n", conf.Port)
+	http.ListenAndServe(fmt.Sprintf(":%d", conf.Port), mux)
 }

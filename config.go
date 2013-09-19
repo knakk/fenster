@@ -4,6 +4,7 @@ type Config struct {
 	Title     string
 	Subtitle  string
 	Licence   string
+	BaseURI   string
 	Port      int
 	QuadStore quadStore
 	UI        userInterface
@@ -22,6 +23,7 @@ type userInterface struct {
 	ShowImages      bool
 	NumImages       int
 	ImagePredicates []string
+	TitlePredicates []string
 }
 
 type vocabulary struct {
