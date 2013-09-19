@@ -29,7 +29,7 @@ const (
 		 `
 )
 
-var templates = template.Must(template.ParseFiles("data/html/index.html"))
+var templates = template.Must(template.ParseFiles("data/html/index.html", "data/html/error.html"))
 var conf Config
 
 type mainHandler struct{}
@@ -105,6 +105,22 @@ func findImages(rdfMap *[]map[string]rdf.Term) []template.HTML {
 	return images
 }
 
+func errorHandler(w http.ResponseWriter, r *http.Request, msg string, status int) {
+	w.WriteHeader(status)
+	data := struct {
+		ErrorCode int
+		ErrorMsg  string
+	}{
+		status,
+		msg,
+	}
+
+	err := templates.ExecuteTemplate(w, "error.html", data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	uri := conf.BaseURI + r.URL.Path
@@ -112,7 +128,12 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	res, err := sparql.Query(conf.QuadStore.Endpoint, q,
 		time.Duration(conf.QuadStore.OpenTimeout)*time.Millisecond, time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errorHandler(w, r, err.Error()+". Refresh to try again.\n\nYou can increase the timeout values in Fensters configuration file.", http.StatusInternalServerError)
+		return
+	}
+
+	if len(res.Results.Bindings) == 0 {
+		errorHandler(w, r, "This URI has no information", http.StatusNotFound)
 		return
 	}
 

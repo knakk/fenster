@@ -53,7 +53,7 @@ func Query(endpoint string, query string, open time.Duration, read time.Duration
 	client := newTimeoutClient(open, read)
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("http request failed or timed out: %v", err)
+		return nil, fmt.Errorf("HTTP request to remote SPARQL endpoint timed out")
 	}
 
 	defer resp.Body.Close()
