@@ -16,12 +16,12 @@ import (
 const (
 	version = "0.1"
 	query   = `
-		SELECT * 
+		SELECT *
 		WHERE
-		 { 
+		 {
 		   GRAPH ?g
 		    {
-		      { <%s> ?p ?o } 
+		      { <%s> ?p ?o }
 		      UNION
 		      { ?s ?p <%s> }
 		    }
@@ -72,9 +72,9 @@ func prefixify(uri string) string {
 	return uri
 }
 
-func findTitle(uri string, rdfMap *[]map[string]rdf.Term) string {
+func findTitle(rdfMap *[]map[string]rdf.Term) interface{} {
 	if len(conf.UI.TitlePredicates) == 0 {
-		return uri
+		return false
 	}
 
 	for _, m := range *rdfMap {
@@ -84,7 +84,7 @@ func findTitle(uri string, rdfMap *[]map[string]rdf.Term) string {
 			}
 		}
 	}
-	return uri
+	return false
 }
 
 func findImages(rdfMap *[]map[string]rdf.Term) []string {
@@ -141,7 +141,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	subj := rejectWhereEmpty("o", &solutions)
 	obj := rejectWhereEmpty("s", &solutions)
 	data := struct {
-		Title              string
+		Title              interface{}
 		Name, Version, URI string
 		AsSubject          *[]map[string]interface{}
 		AsObject           *[]map[string]interface{}
@@ -150,7 +150,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Images             []string
 		ShortURI           string
 	}{
-		findTitle(uri, &solutions),
+		findTitle(&solutions),
 		"Fenster",
 		string(version),
 		uri,

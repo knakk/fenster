@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
 
-  <title>{{.Title}}</title>
+  <title>{{if .Title}}{{.Title}}{{else}}{{.URI}}{{end}}</title>
   <meta name="description" content="RDF quad-store frontend">
   <meta name="author" content="Knakk!">
 
@@ -15,7 +15,10 @@
 <body>
 
   <div id="container">
-    <h2>&lt;{{.URI}}&gt;</h2>
+    {{if .Title}}
+      <h2 class="gray wordwrap">{{.Title}}</h2>
+    {{end}}
+    <h2 class="wordwrap">&lt;{{.URI}}&gt;</h2>
 
     <ul>
     {{range .Images}}
@@ -24,9 +27,9 @@
     </ul>
     <div class="clearfix"></div>
 
-    <h3><span class="black">{{.ShortURI}}</span> as subject ({{.AsSubjectSize}})</h3>
+    <h3 class="wordwrap"><span class="black">{{.ShortURI}}</span> as subject ({{.AsSubjectSize}})</h3>
 
-    <table class="quads">
+    <table class="quads" class="wordwrap">
     <thead>
       <tr>
         <td>GRAPH</td>
@@ -46,7 +49,7 @@
     </table>
 
 
-    <h3><span class="black">{{.ShortURI}}</span> as object ({{.AsObjectSize}})</h3>
+    <h3 class="wordwrap"><span class="black">{{.ShortURI}}</span> as object ({{.AsObjectSize}})</h3>
     <table class="quads">
     <thead>
       <tr>
