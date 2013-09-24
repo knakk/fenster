@@ -99,8 +99,14 @@
     function makeAllSortable(parent) {
         parent = parent || document.body;
         var t = parent.getElementsByTagName('table'), i = t.length;
-        while (--i >= 0) makeSortable(t[i]);
-    }
+
+        while (--i >= 0) {
+          // Only make sortable if it has more than 1 rows
+          if (t[i].tBodies[0].rows.length - 1 > 1) {
+            makeSortable(t[i]);
+          }
+        }
+      }
 
     window.onload = function () {makeAllSortable();};
   </script>
