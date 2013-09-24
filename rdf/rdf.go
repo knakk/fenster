@@ -7,9 +7,11 @@ import (
 	"time"
 )
 
+type TermType int
+
 // RDF Term types
 const (
-	BLANK = iota
+	BLANK TermType = iota
 	LITERAL
 	URI
 )
@@ -17,7 +19,7 @@ const (
 // Term is the common interface for RDF Terms
 type Term interface {
 	String() string
-	Type() int
+	Type() TermType
 	Eq(Term) bool
 	Value() interface{}
 }
@@ -31,7 +33,7 @@ func (u Uri) String() string {
 }
 
 // Type returns the RDF Term type (URI)
-func (u Uri) Type() int {
+func (u Uri) Type() TermType {
 	return URI
 }
 
@@ -75,7 +77,7 @@ func (l Literal) String() string {
 }
 
 // Type returns the RDF Term type (LITERAL)
-func (l Literal) Type() int {
+func (l Literal) Type() TermType {
 	return LITERAL
 }
 
@@ -146,7 +148,7 @@ func (b Blank) String() string {
 }
 
 // Type returns the RDF Term type (BLANK)
-func (b Blank) Type() int {
+func (b Blank) Type() TermType {
 	return BLANK
 }
 
