@@ -80,7 +80,7 @@ func findTitle(rdfMap *[]map[string]rdf.Term) interface{} {
 	for _, m := range *rdfMap {
 		for _, p := range conf.UI.TitlePredicates {
 			if m["p"].String() == "<"+p+">" {
-				return m["o"].String()
+				return m["o"].Value()
 			}
 		}
 	}

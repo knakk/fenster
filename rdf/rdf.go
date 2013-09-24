@@ -81,6 +81,9 @@ func (l Literal) Type() int {
 
 // Value returns the Literal value, in the corresponding go type, i.e.
 // xsd:integer -> int, xsd:float -> float64 and so on.
+//
+// For language-tagged literals, it returns the string without the trailing
+// language tag.
 func (l Literal) Value() interface{} {
 	return l.Val
 }
