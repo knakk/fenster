@@ -32,17 +32,17 @@
     <table class="quads" class="wordwrap">
     <thead>
       <tr>
-        <td>GRAPH</td>
-        <td>PREDICATE</td>
-        <td>OBJECT</td>
+        <td class="td-graph">GRAPH</td>
+        <td class="td-pred">PREDICATE</td>
+        <td class="td-obj">OBJECT</td>
       </tr>
     </thead>
     <tbody>
     {{range $el := .AsSubject}}
       <tr>
-        <td>{{$el.g}}</td>
-        <td>{{$el.p}}</td>
-        <td>{{$el.o}}</td>
+        <td class="td-graph">{{$el.g}}</td>
+        <td class="td-pred">{{$el.p}}</td>
+        <td class="td-obj">{{$el.o}}</td>
       </tr>
     {{end}}
     </tbody>
@@ -53,17 +53,17 @@
     <table class="quads">
     <thead>
       <tr>
-        <td>GRAPH</td>
-        <td>SUBJECT</td>
-        <td>PREDICATE</td>
+        <td class="td-graph">GRAPH</td>
+        <td class="td-subj">SUBJECT</td>
+        <td class="td-pred">PREDICATE</td>
       </tr>
     </thead>
     <tbody>
     {{range $el := .AsObject}}
       <tr>
-        <td>{{$el.g}}</td>
-        <td>{{$el.s}}</td>
-        <td>{{$el.p}}</td>
+        <td class="td-graph">{{$el.g}}</td>
+        <td class="td-subj">{{$el.s}}</td>
+        <td class="td-pred">{{$el.p}}</td>
       </tr>
     {{end}}
     </tbody>
