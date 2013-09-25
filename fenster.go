@@ -41,7 +41,7 @@ func rejectWhereEmpty(key string, rdfMap *[]map[string]rdf.Term) *[]map[string]i
 			tm := make(map[string]interface{})
 			for k, v := range m {
 				if k != "g" && k != "p" && strings.HasPrefix(v.String(), "<"+conf.BaseURI) {
-					link := fmt.Sprintf("<a href='/%v'>%v</a>", v.String()[25:len(v.String())-1], template.HTMLEscapeString(prefixify(v.String())))
+					link := fmt.Sprintf("<a href='/%v'>%v</a>", v.String()[25:len(v.String())-1], template.HTMLEscapeString(v.String()))
 					tm[k] = template.HTML(link)
 				} else {
 					tm[k] = prefixify(v.String())
