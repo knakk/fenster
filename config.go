@@ -24,6 +24,7 @@ type userInterface struct {
 	NumImages       int
 	ImagePredicates []string
 	TitlePredicates []string
+	RootRedirectTo  string
 }
 
 type vocabulary struct {

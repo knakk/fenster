@@ -122,6 +122,10 @@ func errorHandler(w http.ResponseWriter, r *http.Request, msg string, status int
 }
 
 func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/" {
+		http.Redirect(w, r, conf.UI.RootRedirectTo, http.StatusFound)
+		return
+	}
 
 	uri := conf.BaseURI + r.URL.Path
 	q := fmt.Sprintf(query, uri, uri)
