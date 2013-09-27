@@ -13,7 +13,7 @@ func TestAppnameAndVersionInPage(t *testing.T) {
 	server := httptest.NewServer(handler)
 	defer server.Close()
 
-	resp, err := http.Get(server.URL)
+	resp, err := http.Get(server.URL + "/resource/tnr_1140686")
 	if err != nil {
 		t.Fatal(err)
 	}
