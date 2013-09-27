@@ -10,3 +10,6 @@ package: build
 test:
 	go get -u -v
 	go test ./...
+
+integration: build
+	./integration-tests.sh
