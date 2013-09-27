@@ -152,7 +152,6 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		AsSubjectSize      int
 		AsObjectSize       int
 		Images             []string
-		ShortURI           string
 	}{
 		findTitle(&solutions),
 		"Fenster",
@@ -163,7 +162,6 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		len(*subj) - 1,
 		len(*obj) - 1,
 		findImages(&solutions),
-		prefixify("<" + uri + ">"),
 	}
 
 	err = templates.ExecuteTemplate(w, "index.html", data)
