@@ -188,6 +188,7 @@ func main() {
 	var handler mainHandler
 	mux.HandleFunc("/robots.txt", serveFile("data/robots.txt"))
 	mux.HandleFunc("/css/styles.css", serveFile("data/css/styles.css"))
+	mux.HandleFunc("/favicon.ico", serveFile("data/favicon.ico"))
 	mux.Handle("/", handler)
 
 	fmt.Printf("Listening on port %d ...\n", conf.Port)
