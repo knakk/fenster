@@ -15,7 +15,7 @@ import (
 //
 //It returns the string unmodified if no match is found.
 func prefixify(prefixes *[][]string, uri string) string {
-	uriOriginal := "" + uri
+	uriOriginal := uri
 
 	// trim enclosing < > if present
 	if strings.HasPrefix(uri, "<") && strings.HasSuffix(uri, ">") {
