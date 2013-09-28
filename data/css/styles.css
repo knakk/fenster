@@ -14,7 +14,7 @@ table.quads thead { font-weight: bold }
 table.quads tr:nth-of-type(even) { background-color: #ddd; }
 table.quads td { padding: 4px 20px 4px 6px; word-wrap: break-word}
 table.quads thead td { cursor: pointer;}
-td.td-graph { width: 16%;}
+td.td-graph { width: 17%;}
 td.td-pred { width: 28%;}
 div.clearfix { clear: both;}
 footer { max-width: 500px; margin: auto;}
