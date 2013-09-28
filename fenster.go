@@ -24,7 +24,7 @@ const (
 		      { ?s ?p <%s> }
 		    }
 		 }
-		 `
+		 LIMIT %d`
 )
 
 var (
@@ -34,6 +34,7 @@ var (
 
 type mainHandler struct{}
 
+// handler for displaying the RDF resource
 func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
 		http.Redirect(w, r, conf.UI.RootRedirectTo, http.StatusFound)
@@ -41,7 +42,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	uri := conf.BaseURI + r.URL.Path
-	q := fmt.Sprintf(query, uri, uri)
+	q := fmt.Sprintf(query, uri, uri, conf.QuadStore.ResultsLimit)
 	res, err := sparql.Query(conf.QuadStore.Endpoint, q,
 		time.Duration(conf.QuadStore.OpenTimeout)*time.Millisecond, time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond)
 	if err != nil {
