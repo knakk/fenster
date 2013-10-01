@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -41,7 +42,21 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uri := conf.BaseURI + r.URL.Path
+	var uri string
+	resolved := false
+
+	if strings.HasSuffix(r.URL.Path, ".html") {
+		uri = conf.BaseURI + strings.TrimSuffix(r.URL.Path, ".html")
+		resolved = true
+	} else {
+		uri = conf.BaseURI + r.URL.Path
+	}
+
+	if !resolved {
+		http.Redirect(w, r, r.URL.Path+".html", http.StatusFound)
+		return
+	}
+
 	q := fmt.Sprintf(query, uri, uri, conf.QuadStore.ResultsLimit)
 	res, err := sparql.Query(conf.QuadStore.Endpoint, q,
 		time.Duration(conf.QuadStore.OpenTimeout)*time.Millisecond, time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond)
