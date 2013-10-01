@@ -47,7 +47,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var uri string
 	resolved := false
 	format := "json"
-	suffix := regexp.MustCompile(`\.[a-z]+$`).FindString(r.URL.Path)
+	suffix := regexp.MustCompile(`\.[a-z3]+$`).FindString(r.URL.Path)
 	switch suffix {
 	case ".html":
 		uri = conf.BaseURI + strings.TrimSuffix(r.URL.Path, ".html")
@@ -55,6 +55,10 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		resolved = true
 	case ".json":
 		uri = conf.BaseURI + strings.TrimSuffix(r.URL.Path, ".json")
+		resolved = true
+	case ".n3":
+		uri = conf.BaseURI + strings.TrimSuffix(r.URL.Path, ".n3")
+		format = "n3"
 		resolved = true
 	default:
 		uri = conf.BaseURI + r.URL.Path
@@ -66,22 +70,28 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	q := fmt.Sprintf(query, uri, uri, conf.QuadStore.ResultsLimit)
-	json, err := sparql.Query(conf.QuadStore.Endpoint, q, format,
+	resp, err := sparql.Query(conf.QuadStore.Endpoint, q, format,
 		time.Duration(conf.QuadStore.OpenTimeout)*time.Millisecond, time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond)
 	if err != nil {
 		errorHandler(w, r, err.Error()+". Refresh to try again.\n\nYou can increase the timeout values in Fensters configuration file.", http.StatusInternalServerError)
 		return
 	}
 
-	res, err := sparql.ParseJSON(json)
-	if err != nil {
-		errorHandler(w, r, "Failed to parse JSON response from remote SPARQL endpoint.", http.StatusInternalServerError)
+	if format == "json" {
+		w.Header().Set("Content-Type", "application/json")
+		io.WriteString(w, string(resp))
 		return
 	}
 
-	if format == "json" {
-		w.Header().Set("Content-Type", "application/json")
-		io.WriteString(w, string(json))
+	if format == "n3" {
+		w.Header().Set("Content-Type", "text/n3")
+		io.WriteString(w, string(resp))
+		return
+	}
+
+	res, err := sparql.ParseJSON(resp)
+	if err != nil {
+		errorHandler(w, r, "Failed to parse JSON response from remote SPARQL endpoint.", http.StatusInternalServerError)
 		return
 	}
 

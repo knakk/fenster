@@ -1,4 +1,4 @@
-casper.test.begin('Existing resource', 6, function suite(test) {
+casper.test.begin('Existing resource', 7, function suite(test) {
   casper.start("http://localhost:8080/resource/tnr_1140686", function() {
     test.assertHttpStatus(200, "response status code 200");
     test.assertTitle("Azur", "title as expected");
@@ -12,6 +12,10 @@ casper.test.begin('Existing resource', 6, function suite(test) {
 
   casper.thenOpen("http://localhost:8080/resource/tnr_1140686.json", function(response) {
     test.assertMatch(response.headers.get('Content-Type'), /^application\/json/, "wrong content-type")
+  });
+
+  casper.thenOpen("http://localhost:8080/resource/tnr_1140686.n3", function(response) {
+    test.assertMatch(response.headers.get('Content-Type'), /^text\/n3/, "wrong content-type")
   });
 
   casper.run(function () {
