@@ -60,8 +60,13 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		uri = conf.BaseURI + strings.TrimSuffix(r.URL.Path, ".n3")
 		format = "n3"
 		resolved = true
+	case ".xml":
+		uri = conf.BaseURI + strings.TrimSuffix(r.URL.Path, ".xml")
+		format = "xml"
+		resolved = true
 	default:
-		uri = conf.BaseURI + r.URL.Path
+		errorHandler(w, r, fmt.Sprintf("Unsupported output format: %s.\n\nValid formats formats are: html, json, n3, xml", suffix[1:]), http.StatusBadRequest)
+		return
 	}
 
 	if !resolved {
@@ -77,14 +82,22 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if format == "json" {
-		w.Header().Set("Content-Type", "application/json")
+	if format != "html" {
+		switch format {
+		case "json":
+			w.Header().Set("Content-Type", "application/json")
+		case "n3":
+			w.Header().Set("Content-Type", "text/n3")
+		case "xml":
+			w.Header().Set("Content-Type", "application/sparql-results+xml")
+		}
+
 		io.WriteString(w, string(resp))
 		return
 	}
 
 	if format == "n3" {
-		w.Header().Set("Content-Type", "text/n3")
+
 		io.WriteString(w, string(resp))
 		return
 	}
