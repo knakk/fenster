@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -44,11 +46,17 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	var uri string
 	resolved := false
-
-	if strings.HasSuffix(r.URL.Path, ".html") {
+	format := "json"
+	suffix := regexp.MustCompile(`\.[a-z]+$`).FindString(r.URL.Path)
+	switch suffix {
+	case ".html":
 		uri = conf.BaseURI + strings.TrimSuffix(r.URL.Path, ".html")
+		format = "html"
 		resolved = true
-	} else {
+	case ".json":
+		uri = conf.BaseURI + strings.TrimSuffix(r.URL.Path, ".json")
+		resolved = true
+	default:
 		uri = conf.BaseURI + r.URL.Path
 	}
 
@@ -58,7 +66,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	q := fmt.Sprintf(query, uri, uri, conf.QuadStore.ResultsLimit)
-	json, err := sparql.Query(conf.QuadStore.Endpoint, q, "json",
+	json, err := sparql.Query(conf.QuadStore.Endpoint, q, format,
 		time.Duration(conf.QuadStore.OpenTimeout)*time.Millisecond, time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond)
 	if err != nil {
 		errorHandler(w, r, err.Error()+". Refresh to try again.\n\nYou can increase the timeout values in Fensters configuration file.", http.StatusInternalServerError)
@@ -68,6 +76,12 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	res, err := sparql.ParseJSON(json)
 	if err != nil {
 		errorHandler(w, r, "Failed to parse JSON response from remote SPARQL endpoint.", http.StatusInternalServerError)
+		return
+	}
+
+	if format == "json" {
+		w.Header().Set("Content-Type", "application/json")
+		io.WriteString(w, string(json))
 		return
 	}
 
