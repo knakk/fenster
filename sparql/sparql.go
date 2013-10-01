@@ -40,15 +40,19 @@ type jsonBinding struct {
 // Query sends a request to a remote SPARQL endpoint and returns the unparsed
 // response body
 func Query(endpoint string, query string, format string, open time.Duration, read time.Duration) ([]byte, error) {
-	// json = "application/sparql-results+json"
-	// xml = "application/sparql-results+xml"
-	// n3 = "text/n3"
-	//
-	//switch
-
 	reqDefaults := url.Values{}
-	reqDefaults.Set("format", "application/sparql-results+json")
 	reqDefaults.Set("query", query)
+
+	switch format {
+	case "json":
+		reqDefaults.Set("format", "application/sparql-results+json")
+	case "xml":
+		reqDefaults.Set("format", "application/sparql-results+xml")
+	case "n3":
+		reqDefaults.Set("format", "text/n3")
+	default:
+		reqDefaults.Set("format", "application/sparql-results+json")
+	}
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s?%v", endpoint, reqDefaults.Encode()), nil)
 	if err != nil {
