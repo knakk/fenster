@@ -67,7 +67,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		format = "xml"
 		resolved = true
 	default:
-		errorHandler(w, r, fmt.Sprintf("Unsupported output format: %s.\n\nValid formats formats are: html, json, n3, xml", suffix[1:]), http.StatusBadRequest)
+		errorHandler(w, r, fmt.Sprintf("Unsupported output format: %s.\n\nValid formats are: html, json, n3, xml", suffix[1:]), http.StatusBadRequest)
 		return
 	}
 
