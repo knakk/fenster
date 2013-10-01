@@ -47,8 +47,10 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var uri string
 	resolved := false
 	format := "json"
-	suffix := regexp.MustCompile(`\.[a-z3]+$`).FindString(r.URL.Path)
+	suffix := regexp.MustCompile(`\.[a-z1-9]+$`).FindString(r.URL.Path)
 	switch suffix {
+	case "":
+		break
 	case ".html":
 		uri = conf.BaseURI + strings.TrimSuffix(r.URL.Path, ".html")
 		format = "html"
@@ -91,13 +93,6 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case "xml":
 			w.Header().Set("Content-Type", "application/sparql-results+xml")
 		}
-
-		io.WriteString(w, string(resp))
-		return
-	}
-
-	if format == "n3" {
-
 		io.WriteString(w, string(resp))
 		return
 	}
@@ -142,7 +137,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// errorHandler serves 404 & 500 error pages
+// errorHandler serves 40x & 50x error pages
 func errorHandler(w http.ResponseWriter, r *http.Request, msg string, status int) {
 	w.WriteHeader(status)
 	data := struct {

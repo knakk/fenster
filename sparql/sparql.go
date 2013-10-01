@@ -44,7 +44,7 @@ func Query(endpoint string, query string, format string, open time.Duration, rea
 	reqDefaults.Set("query", query)
 
 	switch format {
-	case "json":
+	case "json", "html":
 		reqDefaults.Set("format", "application/sparql-results+json")
 	case "xml":
 		reqDefaults.Set("format", "application/sparql-results+xml")
