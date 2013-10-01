@@ -37,9 +37,14 @@ type jsonBinding struct {
 	DataType string
 }
 
-// Query sends a request to a remote SPARQL endpoint and returns the unmarshaled
-// JSON response.
-func Query(endpoint string, query string, open time.Duration, read time.Duration) (*Results, error) {
+// Query sends a request to a remote SPARQL endpoint and returns the unparsed
+// response body
+func Query(endpoint string, query string, format string, open time.Duration, read time.Duration) ([]byte, error) {
+	// json = "application/sparql-results+json"
+	// xml = "application/sparql-results+xml"
+	// n3 = "text/n3"
+	//
+	//switch
 
 	reqDefaults := url.Values{}
 	reqDefaults.Set("format", "application/sparql-results+json")
@@ -67,15 +72,12 @@ func Query(endpoint string, query string, open time.Duration, read time.Duration
 		return nil, fmt.Errorf("failed to read request body: %v", err)
 	}
 
-	res, err := parse(body)
-	if err != nil {
-		return nil, err
-	}
-
-	return res, nil
+	return body, nil
 }
 
-func parse(raw []byte) (*Results, error) {
+// ParseJSON unmarshals a 'application/sparql-results+json' response into
+// the Results struct
+func ParseJSON(raw []byte) (*Results, error) {
 	var res *Results
 	err := json.Unmarshal(raw, &res)
 	if err != nil {

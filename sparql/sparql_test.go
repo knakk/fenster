@@ -94,7 +94,7 @@ var res *Results
 
 func init() {
 	var err error
-	res, err = parse([]byte(response))
+	res, err = ParseJSON([]byte(response))
 	if err != nil {
 		log.Fatal("json parse error: ", err)
 	}

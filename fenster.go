@@ -58,10 +58,16 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	q := fmt.Sprintf(query, uri, uri, conf.QuadStore.ResultsLimit)
-	res, err := sparql.Query(conf.QuadStore.Endpoint, q,
+	json, err := sparql.Query(conf.QuadStore.Endpoint, q, "json",
 		time.Duration(conf.QuadStore.OpenTimeout)*time.Millisecond, time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond)
 	if err != nil {
 		errorHandler(w, r, err.Error()+". Refresh to try again.\n\nYou can increase the timeout values in Fensters configuration file.", http.StatusInternalServerError)
+		return
+	}
+
+	res, err := sparql.ParseJSON(json)
+	if err != nil {
+		errorHandler(w, r, "Failed to parse JSON response from remote SPARQL endpoint.", http.StatusInternalServerError)
 		return
 	}
 
