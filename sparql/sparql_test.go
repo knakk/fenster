@@ -119,7 +119,7 @@ func TestJsonUnmarshal(t *testing.T) {
 
 	for i, tt := range resTests {
 		if tt.in != tt.out {
-			t.Errorf("%d) expected %v, got %v", i, tt.in, tt.out)
+			t.Errorf("%d) expected %v, got %v", i, tt.out, tt.in)
 		}
 	}
 

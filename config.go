@@ -17,6 +17,7 @@ type quadStore struct {
 	Graphs        []string
 	OpenTimeout   int
 	ReadTimeout   int
+	ResultsLimit  int
 }
 
 type userInterface struct {

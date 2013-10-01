@@ -9,13 +9,18 @@ footer { padding: 2em;}
 #container { padding: 1em; margin: auto; max-width:1000px;}
 li.image { display:inline-block; margin: 2em;}
 img { max-height: 300px;}
+th { text-align: left;}
 table.quads { width:100%; table-layout: fixed;}
 table.quads thead { font-weight: bold }
 table.quads tr:nth-of-type(even) { background-color: #ddd; }
 table.quads td { padding: 4px 20px 4px 6px; word-wrap: break-word}
-table.quads thead td { cursor: pointer;}
-td.td-graph { width: 16%;}
-td.td-pred { width: 28%;}
+th.td-graph { width: 17%;}
+th.td-pred { width: 28%;}
 div.clearfix { clear: both;}
 footer { max-width: 500px; margin: auto;}
 .wordwrap { white-space: pre-wrap; white-space: -moz-pre-wrap; word-wrap: break-word; }
+.sortable { cursor: pointer; }
+
+.th-header { position: relative; }
+.sorting-asc .th-header:after { position: absolute; right: 10px; content: '↓'; }
+.sorting-desc .th-header:after { position: absolute; right: 10px; content: '↑'; }
