@@ -18,28 +18,12 @@ const (
 	version = "0.1"
 	query   = `
 		SELECT *
-		WHERE
-		 {
-		   GRAPH ?g
-		    {
-		      { <%s> ?p ?o }
-		      UNION
-		      { ?s ?p <%s> }
-		    }
-		 }
-		 LIMIT %d`
+		WHERE { GRAPH ?g { { <%s> ?p ?o } UNION { ?s ?p <%s> } } }
+		LIMIT %d
+		`
 	query2 = `
 		CONSTRUCT { GRAPH ?g { <%s> ?p ?o . ?s ?p <%s> } }
-		WHERE
-		 {
-		   GRAPH ?g
-		    {
-		      { <%s> ?p ?o }
-		      UNION
-		      { ?s ?p <%s> }
-		    }
-		}
-
+		WHERE { GRAPH ?g { { <%s> ?p ?o } UNION { ?s ?p <%s> } } }
 	   `
 )
 
