@@ -100,8 +100,8 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	default:
 		errorHandler(w, r,
-			fmt.Sprintf(`Unsupported output format: %s.\n\n
-				Valid formats are: html, json, rdf`, suffix[1:]), http.StatusBadRequest)
+			fmt.Sprintf("Unsupported output format: %s.\n\n"+
+				"Valid formats are: html, json, rdf", suffix[1:]), http.StatusBadRequest)
 		return
 	}
 
@@ -118,8 +118,8 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond)
 	if err != nil {
 		errorHandler(w, r,
-			err.Error()+`. Refresh to try again.\n\nYou can increase the timeout
-			values in Fensters configuration file.`, http.StatusInternalServerError)
+			err.Error()+". Refresh to try again.\n\nYou can increase the timeout"+
+				"values in Fensters configuration file.", http.StatusInternalServerError)
 		return
 	}
 
