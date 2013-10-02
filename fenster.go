@@ -28,6 +28,19 @@ const (
 		    }
 		 }
 		 LIMIT %d`
+	query2 = `
+		CONSTRUCT { GRAPH ?g { <%s> ?p ?o . ?s ?p <%s> } }
+		WHERE
+		 {
+		   GRAPH ?g
+		    {
+		      { <%s> ?p ?o }
+		      UNION
+		      { ?s ?p <%s> }
+		    }
+		}
+
+	   `
 )
 
 var (
@@ -44,7 +57,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var uri string
+	var uri, q string
 	resolved := false
 	format := "json"
 	suffix := regexp.MustCompile(`\.[a-z1-9]+$`).FindString(r.URL.Path)
@@ -53,21 +66,20 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		break
 	case ".html":
 		uri = conf.BaseURI + strings.TrimSuffix(r.URL.Path, ".html")
+		q = fmt.Sprintf(query, uri, uri, conf.QuadStore.ResultsLimit)
 		format = "html"
 		resolved = true
 	case ".json":
 		uri = conf.BaseURI + strings.TrimSuffix(r.URL.Path, ".json")
+		q = fmt.Sprintf(query, uri, uri, conf.QuadStore.ResultsLimit)
 		resolved = true
-	case ".n3":
-		uri = conf.BaseURI + strings.TrimSuffix(r.URL.Path, ".n3")
-		format = "n3"
-		resolved = true
-	case ".xml":
-		uri = conf.BaseURI + strings.TrimSuffix(r.URL.Path, ".xml")
-		format = "xml"
+	case ".rdf":
+		uri = conf.BaseURI + strings.TrimSuffix(r.URL.Path, ".rdf")
+		q = fmt.Sprintf(query2, uri, uri, uri, uri)
+		format = "rdf"
 		resolved = true
 	default:
-		errorHandler(w, r, fmt.Sprintf("Unsupported output format: %s.\n\nValid formats are: html, json, n3, xml", suffix[1:]), http.StatusBadRequest)
+		errorHandler(w, r, fmt.Sprintf("Unsupported output format: %s.\n\nValid formats are: html, json, rdf", suffix[1:]), http.StatusBadRequest)
 		return
 	}
 
@@ -76,7 +88,6 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	q := fmt.Sprintf(query, uri, uri, conf.QuadStore.ResultsLimit)
 	resp, err := sparql.Query(conf.QuadStore.Endpoint, q, format,
 		time.Duration(conf.QuadStore.OpenTimeout)*time.Millisecond, time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond)
 	if err != nil {
@@ -88,10 +99,8 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		switch format {
 		case "json":
 			w.Header().Set("Content-Type", "application/json")
-		case "n3":
-			w.Header().Set("Content-Type", "text/n3")
-		case "xml":
-			w.Header().Set("Content-Type", "application/sparql-results+xml")
+		case "rdf":
+			w.Header().Set("Content-Type", "application/x-trig")
 		}
 		io.WriteString(w, string(resp))
 		return

@@ -14,8 +14,8 @@ casper.test.begin('Existing resource', 9, function suite(test) {
     test.assertMatch(response.headers.get('Content-Type'), /^application\/json/, "correct content-type")
   });
 
-  casper.thenOpen("http://localhost:8080/resource/tnr_1140686.n3", function(response) {
-    test.assertMatch(response.headers.get('Content-Type'), /^text\/n3/, "correct content-type")
+  casper.thenOpen("http://localhost:8080/resource/tnr_1140686.rdf", function(response) {
+    test.assertMatch(response.headers.get('Content-Type'), /^application\/x-trig/, "correct content-type")
   });
 
   casper.thenOpen("http://localhost:8080/resource/tnr_1140686.zappa", function() {
