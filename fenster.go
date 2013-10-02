@@ -140,15 +140,18 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	subj := rejectWhereEmpty("o", &solutions)
 	obj := rejectWhereEmpty("s", &solutions)
 	data := struct {
-		Title              interface{}
-		Name, Version, URI string
-		AsSubject          *[]map[string]interface{}
-		AsObject           *[]map[string]interface{}
-		AsSubjectSize      int
-		AsObjectSize       int
-		Images             []string
+		Title               interface{}
+		License, LicenseURL string
+		Name, Version, URI  string
+		AsSubject           *[]map[string]interface{}
+		AsObject            *[]map[string]interface{}
+		AsSubjectSize       int
+		AsObjectSize        int
+		Images              []string
 	}{
 		findTitle(&conf.UI.TitlePredicates, &solutions),
+		conf.License,
+		conf.LicenseURL,
 		"Fenster",
 		string(version),
 		uri,

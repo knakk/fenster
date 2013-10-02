@@ -1,14 +1,15 @@
 package main
 
 type Config struct {
-	Title     string
-	Subtitle  string
-	Licence   string
-	BaseURI   string
-	Port      int
-	QuadStore quadStore
-	UI        userInterface
-	Vocab     vocabulary
+	Title      string
+	Subtitle   string
+	License    string
+	LicenseURL string
+	BaseURI    string
+	Port       int
+	QuadStore  quadStore
+	UI         userInterface
+	Vocab      vocabulary
 }
 
 type quadStore struct {
