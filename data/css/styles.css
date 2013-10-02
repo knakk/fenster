@@ -6,7 +6,7 @@ h3 { background-color: #549908; padding: 3px; color: #fff;}
 .black { color: #000;}
 .gray  { color: #9a9a9a;}
 footer { padding: 2em;}
-#container { padding: 1em; margin: auto; max-width:1000px;}
+#container { padding: 1em; }
 li.image { display:inline-block; margin: 2em;}
 img { max-height: 300px;}
 th { text-align: left;}
@@ -14,8 +14,8 @@ table.quads { width:100%; table-layout: fixed;}
 table.quads thead { font-weight: bold }
 table.quads tr:nth-of-type(even) { background-color: #ddd; }
 table.quads td { padding: 4px 20px 4px 6px; word-wrap: break-word}
-th.td-graph { width: 17%;}
-th.td-pred { width: 28%;}
+th.td-graph { width: 15%;}
+th.td-pred { width: 20%;}
 div.clearfix { clear: both;}
 footer { max-width: 500px; margin: auto;}
 .wordwrap { white-space: pre-wrap; white-space: -moz-pre-wrap; word-wrap: break-word; }
