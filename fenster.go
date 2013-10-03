@@ -142,6 +142,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Title               interface{}
 		License, LicenseURL string
+		Endpoint            string
 		Name, Version, URI  string
 		AsSubject           *[]map[string]interface{}
 		AsObject            *[]map[string]interface{}
@@ -152,6 +153,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		findTitle(&conf.UI.TitlePredicates, &solutions),
 		conf.License,
 		conf.LicenseURL,
+		conf.QuadStore.Endpoint,
 		"Fenster",
 		string(version),
 		uri,
