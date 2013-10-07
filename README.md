@@ -3,14 +3,14 @@ Fenster is a fronted for RDF quad-stores.
 
 It is similar to [Pubby](http://wifo5-03.informatik.uni-mannheim.de/pubby/), but differs in that it shows triples from all public graphs, not just the default graph.
 
-Example of how an resolvable URI is presented in Fenster: [http://data.deichman.no/resource/tnr_1140686](http://data.deichman.no/resource/tnr_1140686)
+Example of how a resolvable URI, [http://data.deichman.no/resource/tnr_1140686](http://data.deichman.no/resource/tnr_1140686), is presented in Fenster:
 ![screenshot](https://dl.dropboxusercontent.com/u/27551242/azur.png)
 
 ### Status
 It's still in an early beta, but stable and usefull. Fenster is allready used in production as a frontend for the [RDF-catalogue of Oslo public library](http://data.deichman.no).
 
 ### Deployment
-Fenster compiles to a statically linked binary, so deployment couldn't be simpler. It's written in Go, so you'll need the [Go toolchain](http://golang.org) to make it compile:
+Fenster compiles to a statically linked binary, so deployment couldn't be simpler. It's written in Go, so you'll need the [Go toolchain](http://golang.org/doc/install) to make it compile:
 
 1. `git clone https://github.com/knakk/fenster`
 2. `cd fenster`
