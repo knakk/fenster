@@ -18,7 +18,7 @@ Fenster compiles to a statically linked binary, so deployment couldn't be simple
 4. copy `fenster.tar.gz` to your server
 5. unpack, adjust settings in `config.ini` and run `fenster`
 
-Note tha you have to do the build step (3) manually if your target platform is of a different architecture than your compilation platform.
+Note that you have to do the build step (3) manually if your target platform is of a different architecture than your compilation platform.
 [See this guide](http://dave.cheney.net/2012/09/08/an-introduction-to-cross-compilation-with-go) if you don't know how to do that.
 
 If you're on Ubuntu, you might want to deploy Fenster as an Upstart service. Example config:
