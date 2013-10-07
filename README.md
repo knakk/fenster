@@ -34,6 +34,9 @@ chdir /path/to/fenster
 exec ./fenster
 ```
 
+### License
+GPLv3
+
 ### Todo
 * Logging
 * Test different SPARQL endpoints. Currently only tested against Virtuoso.
