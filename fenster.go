@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	version = "0.1"
+	version = "0.2"
 	query   = `
 		SELECT *
 		WHERE { GRAPH ?g { { <%s> ?p ?o } UNION { ?s ?p <%s> } } }
