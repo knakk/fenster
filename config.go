@@ -1,8 +1,6 @@
 package main
 
 type Config struct {
-	Title      string
-	Subtitle   string
 	License    string
 	LicenseURL string
 	BaseURI    string
@@ -13,12 +11,10 @@ type Config struct {
 }
 
 type quadStore struct {
-	Endpoint      string
-	ShowAllGraphs bool
-	Graphs        []string
-	OpenTimeout   int
-	ReadTimeout   int
-	ResultsLimit  int
+	Endpoint     string
+	OpenTimeout  int
+	ReadTimeout  int
+	ResultsLimit int
 }
 
 type userInterface struct {
