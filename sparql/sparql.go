@@ -139,9 +139,3 @@ func termFromJSON(j jsonBinding) (rdf.Term, error) {
 		return rdf.Literal{}, fmt.Errorf("unknown term type")
 	}
 }
-
-// Update sends a SPARQL UPDATE request to remote endpoint. It returns whatever
-// answer the remote service gave.
-func Update(endpoint string, query string) (string, error) {
-	return "Not implemented", nil
-}
