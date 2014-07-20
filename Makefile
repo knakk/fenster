@@ -1,4 +1,10 @@
-all: build
+all: todo
+	@go vet
+	@golint .
+
+todo:
+	@grep -rn TODO *.go || true
+	@grep -rn println *.go || true
 
 build:
 	@export GOBIN=$(shell pwd)
