@@ -1,10 +1,10 @@
 package main
 
 type Config struct {
+	BaseURI    string
+	ServePort  int
 	License    string
 	LicenseURL string
-	BaseURI    string
-	Port       int
 	QuadStore  quadStore
 	UI         userInterface
 	Vocab      vocabulary

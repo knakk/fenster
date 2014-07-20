@@ -12,7 +12,7 @@ img { max-height: 300px; }
 th { text-align: left; }
 table.quads { width:100%; table-layout: fixed; }
 table.quads thead { font-weight: bold }
-table.quads tr:nth-of-type(even) { background-color: #ddd; }
+table.quads tr:nth-of-type(even) { background-color: #dadada; }
 table.quads td { padding: 4px 20px 4px 6px; word-wrap: break-word }
 th.td-graph { width: 15%; }
 th.td-pred { width: 20%; }

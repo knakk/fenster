@@ -209,6 +209,6 @@ func main() {
 	mux.HandleFunc("/favicon.ico", serveFile("data/favicon.ico"))
 	mux.Handle("/", handler)
 
-	fmt.Printf("Listening on port %d ...\n", conf.Port)
-	http.ListenAndServe(fmt.Sprintf(":%d", conf.Port), mux)
+	fmt.Printf("Listening on port %d ...\n", conf.ServePort)
+	http.ListenAndServe(fmt.Sprintf(":%d", conf.ServePort), mux)
 }

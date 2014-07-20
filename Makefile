@@ -6,6 +6,9 @@ todo:
 	@grep -rn TODO *.go || true
 	@grep -rn println *.go || true
 
+run:
+	@go run fenster.go utils.go config.go
+
 build: deps
 	@export GOBIN=$(shell pwd)
 	@go build
