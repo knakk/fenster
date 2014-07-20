@@ -6,7 +6,7 @@ todo:
 	@grep -rn TODO *.go || true
 	@grep -rn println *.go || true
 
-build:
+build: deps
 	@export GOBIN=$(shell pwd)
 	@go build
 
