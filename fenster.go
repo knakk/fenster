@@ -49,6 +49,7 @@ func rdfHandler(w http.ResponseWriter, r *http.Request) {
 		errorHandler(w, r, err.Error()+". Refresh to try again.\n\nYou can increase the timeout values in Fensters configuration file.", http.StatusInternalServerError)
 		return
 	}
+	defer resp.Close()
 
 	w.Header().Set("Content-Type", "application/x-trig")
 	io.Copy(w, resp)
@@ -69,6 +70,7 @@ func jsonHandler(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
+	defer resp.Close()
 
 	w.Header().Set("Content-Type", "application/json")
 	io.Copy(w, resp)
@@ -121,6 +123,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				"values in Fensters configuration file.", http.StatusInternalServerError)
 		return
 	}
+	defer resp.Close()
 
 	res, err := sparql.ParseJSON(resp)
 	if err != nil {
@@ -129,7 +132,6 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	resp.Close()
 
 	if len(res.Results.Bindings) == 0 {
 		errorHandler(w, r, "This URI has no information", http.StatusNotFound)
