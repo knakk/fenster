@@ -27,7 +27,7 @@
     </ul>
     <div class="clearfix"></div>
 
-    <h3 class="wordwrap"><span class="black">&lt;{{.URI}}&gt;</span> as subject ({{.AsSubjectSize}})</h3>
+    <h3 class="wordwrap"><span class="black">&lt;{{.URI}}&gt;</span> as subject ({{.AsSubjectSize}}{{if gt .MaxSubject .AsSubjectSize}} of {{.MaxSubject}}{{end}})</h3>
 
     <table class="quads" class="wordwrap">
     <thead>
@@ -49,7 +49,7 @@
     </table>
 
 
-    <h3 class="wordwrap"><span class="black">&lt;{{.URI}}&gt;</span> as object ({{.AsObjectSize}})</h3>
+    <h3 class="wordwrap"><span class="black">&lt;{{.URI}}&gt;</span> as object ({{.AsObjectSize}}{{if gt .MaxObject .AsObjectSize}} of {{.MaxObject}}{{end}})</h3>
     <table class="quads">
     <thead>
       <tr>
@@ -79,7 +79,7 @@ l);g=n.slice(0);for(h=c=0;h<f.length;h++)c=f[h],g[c]=n[h];f=d(g);a.children("tbo
       $("table").each(function() {
         var l = $(this).prop('rows').length -2;
         // don't make sortable tables with 1 row, or tables with more than 500 rows
-        if ( l > 1 && l < 500) {
+        if ( l > 1 && l < 501) {
           $(this).find('th').addClass("sortable");
           $(this).stupidtable();
         }

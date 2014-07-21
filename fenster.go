@@ -16,15 +16,16 @@ import (
 
 const (
 	version = "0.2"
-	query   = `
+	qSelect = `
 		SELECT *
 		WHERE { GRAPH ?g { { <%s> ?p ?o } UNION { ?s ?p <%s> } } }
-		LIMIT %d
-		`
-	query2 = `
+		LIMIT %d`
+	qCount = `
+		SELECT  COUNT(?o) AS ?maxO, COUNT(?s) as ?maxS
+		WHERE { GRAPH ?g { { <%s> ?p ?o } UNION { ?s ?p <%s> } } }`
+	qConstruct = `
 		CONSTRUCT { GRAPH ?g { <%s> ?p ?o . ?s ?p <%s> } }
-		WHERE { GRAPH ?g { { <%s> ?p ?o } UNION { ?s ?p <%s> } } }
-	   `
+		WHERE { GRAPH ?g { { <%s> ?p ?o } UNION { ?s ?p <%s> } } }`
 )
 
 var (
@@ -39,7 +40,7 @@ type mainHandler struct{}
 func rdfHandler(w http.ResponseWriter, r *http.Request) {
 	uri := conf.BaseURI + strings.TrimSuffix(r.URL.Path, ".rdf")
 	format := "rdf"
-	q := fmt.Sprintf(query2, uri, uri, uri, uri)
+	q := fmt.Sprintf(qConstruct, uri, uri, uri, uri)
 
 	resp, err := sparql.Query(conf.QuadStore.Endpoint, q, format,
 		time.Duration(conf.QuadStore.OpenTimeout)*time.Millisecond, time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond)
@@ -56,7 +57,7 @@ func rdfHandler(w http.ResponseWriter, r *http.Request) {
 // the SPARQL endpoint
 func jsonHandler(w http.ResponseWriter, r *http.Request) {
 	uri := conf.BaseURI + strings.TrimSuffix(r.URL.Path, ".json")
-	q := fmt.Sprintf(query, uri, uri, conf.QuadStore.ResultsLimit)
+	q := fmt.Sprintf(qSelect, uri, uri, conf.QuadStore.ResultsLimit)
 	format := "json"
 
 	resp, err := sparql.Query(conf.QuadStore.Endpoint, q, format,
@@ -112,7 +113,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	q := fmt.Sprintf(query, uri, uri, conf.QuadStore.ResultsLimit)
+	q := fmt.Sprintf(qSelect, uri, uri, conf.QuadStore.ResultsLimit)
 	resp, err := sparql.Query(conf.QuadStore.Endpoint, q, "json",
 		time.Duration(conf.QuadStore.OpenTimeout)*time.Millisecond,
 		time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond)
@@ -136,6 +137,25 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var maxS, maxO int
+	if len(res.Results.Bindings) >= conf.QuadStore.ResultsLimit {
+		// Fetch solution counts, if we hit the results limit
+		q := fmt.Sprintf(qCount, uri, uri)
+		// TODO use shorter timeouts? This is not vital information
+		resp, err := sparql.Query(conf.QuadStore.Endpoint, q, "json",
+			time.Duration(conf.QuadStore.OpenTimeout)*time.Millisecond,
+			time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond)
+		if err == nil {
+			_, err := sparql.ParseJSON(resp)
+			if err == nil {
+				maxS = 345345
+				maxO = 1234
+				//maxS = res.Bindings()["maxS"][0].Value().(int)
+				//maxO = res.Bindings()["maxO"][0].Value().(int)
+			}
+		}
+	}
+
 	solutions := res.Solutions()
 	subj := rejectWhereEmpty("o", &solutions)
 	obj := rejectWhereEmpty("s", &solutions)
@@ -148,6 +168,8 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		AsObject            *[]map[string]interface{}
 		AsSubjectSize       int
 		AsObjectSize        int
+		MaxSubject          int
+		MaxObject           int
 		Images              []string
 	}{
 		findTitle(&conf.UI.TitlePredicates, &solutions),
@@ -161,6 +183,8 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		obj,
 		len(*subj) - 1,
 		len(*obj) - 1,
+		maxS,
+		maxO,
 		findImages(&solutions),
 	}
 
