@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -33,6 +34,7 @@ var (
 	templates = template.Must(template.ParseFiles("data/html/index.html", "data/html/error.html"))
 	conf      Config
 	repo      *remoteRepo
+	status    *appMetrics
 )
 
 type mainHandler struct{}
@@ -218,6 +220,14 @@ func serveFile(filename string) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func statusHandler(w http.ResponseWriter, r *http.Request) {
+	err := json.NewEncoder(w).Encode(status.Export())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+}
+
 func main() {
 	// Load config file
 	if _, err := toml.DecodeFile("config.ini", &conf); err != nil {
@@ -231,12 +241,16 @@ func main() {
 		time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond,
 	)
 
+	// Register metrics
+	status = registerMetrics()
+
 	// HTTP routing
 	mux := http.NewServeMux()
 	var handler mainHandler
 	mux.HandleFunc("/robots.txt", serveFile("data/robots.txt"))
 	mux.HandleFunc("/css/styles.css", serveFile("data/css/styles.css"))
 	mux.HandleFunc("/favicon.ico", serveFile("data/favicon.ico"))
+	mux.HandleFunc("/.status", statusHandler)
 	mux.Handle("/", handler)
 
 	fmt.Printf("Listening on port %d ...\n", conf.ServePort)
