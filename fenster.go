@@ -12,8 +12,10 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+	"github.com/gorilla/handlers"
 	"github.com/knakk/rdf"
 	"github.com/knakk/sparql"
+	"github.com/rcrowley/go-metrics"
 )
 
 const (
@@ -221,11 +223,11 @@ func serveFile(filename string) func(w http.ResponseWriter, r *http.Request) {
 }
 
 func statusHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(status.Export())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	w.Header().Set("Content-Type", "application/json")
 }
 
 func main() {
@@ -251,7 +253,11 @@ func main() {
 	mux.HandleFunc("/css/styles.css", serveFile("data/css/styles.css"))
 	mux.HandleFunc("/favicon.ico", serveFile("data/favicon.ico"))
 	mux.HandleFunc("/.status", statusHandler)
-	mux.Handle("/", handler)
+	mux.Handle("/", handlers.CompressHandler(
+		Timed(
+			CountedByStatusXX(handler, "status", metrics.DefaultRegistry),
+			"responseTime",
+			metrics.DefaultRegistry)))
 
 	fmt.Printf("Listening on port %d ...\n", conf.ServePort)
 	http.ListenAndServe(fmt.Sprintf(":%d", conf.ServePort), mux)

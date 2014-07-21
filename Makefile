@@ -7,7 +7,7 @@ todo:
 	@grep -rn println *.go || true
 
 run:
-	@go run fenster.go utils.go config.go metrics.go
+	@go run fenster.go utils.go config.go metrics.go tee.go
 
 build: deps
 	@export GOBIN=$(shell pwd)
