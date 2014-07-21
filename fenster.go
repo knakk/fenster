@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+	"github.com/knakk/rdf"
 	"github.com/knakk/sparql"
 )
 
@@ -21,7 +22,7 @@ const (
 		WHERE { GRAPH ?g { { <%s> ?p ?o } UNION { ?s ?p <%s> } } }
 		LIMIT %d`
 	qCount = `
-		SELECT  COUNT(?o) AS ?maxO, COUNT(?s) as ?maxS
+		SELECT COUNT(?s) AS ?maxO, COUNT(?o) as ?maxS
 		WHERE { GRAPH ?g { { <%s> ?p ?o } UNION { ?s ?p <%s> } } }`
 	qConstruct = `
 		CONSTRUCT { GRAPH ?g { <%s> ?p ?o . ?s ?p <%s> } }
@@ -142,12 +143,11 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// TODO use shorter timeouts? This is not vital information
 		resp, err := repo.Query(conf.QuadStore.Endpoint, q, "json")
 		if err == nil {
-			_, err := sparql.ParseJSON(resp)
+			res, err := sparql.ParseJSON(resp)
 			if err == nil {
-				maxS = 345345
-				maxO = 1234
-				//maxS = res.Bindings()["maxS"][0].Value().(int)
-				//maxO = res.Bindings()["maxO"][0].Value().(int)
+				b := res.Bindings()
+				maxS = b["maxS"][0].(*rdf.Literal).Value.(int)
+				maxO = b["maxO"][0].(*rdf.Literal).Value.(int)
 			}
 			resp.Close()
 		}
