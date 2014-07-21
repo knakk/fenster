@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
-	"github.com/knakk/fenster/sparql"
+	"github.com/knakk/sparql"
 )
 
 const (
@@ -31,6 +31,7 @@ const (
 var (
 	templates = template.Must(template.ParseFiles("data/html/index.html", "data/html/error.html"))
 	conf      Config
+	repo      *remoteRepo
 )
 
 type mainHandler struct{}
@@ -42,15 +43,14 @@ func rdfHandler(w http.ResponseWriter, r *http.Request) {
 	format := "rdf"
 	q := fmt.Sprintf(qConstruct, uri, uri, uri, uri)
 
-	resp, err := sparql.Query(conf.QuadStore.Endpoint, q, format,
-		time.Duration(conf.QuadStore.OpenTimeout)*time.Millisecond, time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond)
+	resp, err := repo.Query(conf.QuadStore.Endpoint, q, format)
 	if err != nil {
 		errorHandler(w, r, err.Error()+". Refresh to try again.\n\nYou can increase the timeout values in Fensters configuration file.", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/x-trig")
-	io.WriteString(w, string(resp))
+	io.Copy(w, resp)
 }
 
 // jsonHandler serves the raw "application/sparql-results+json" results from
@@ -60,8 +60,7 @@ func jsonHandler(w http.ResponseWriter, r *http.Request) {
 	q := fmt.Sprintf(qSelect, uri, uri, conf.QuadStore.ResultsLimit)
 	format := "json"
 
-	resp, err := sparql.Query(conf.QuadStore.Endpoint, q, format,
-		time.Duration(conf.QuadStore.OpenTimeout)*time.Millisecond, time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond)
+	resp, err := repo.Query(conf.QuadStore.Endpoint, q, format)
 	if err != nil {
 		errorHandler(w, r,
 			err.Error()+`. Refresh to try again.\n\n
@@ -71,7 +70,7 @@ func jsonHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	io.WriteString(w, string(resp))
+	io.Copy(w, resp)
 }
 
 // mainHandler serves the resource HTML presentation, or dispatches to the
@@ -114,9 +113,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	q := fmt.Sprintf(qSelect, uri, uri, conf.QuadStore.ResultsLimit)
-	resp, err := sparql.Query(conf.QuadStore.Endpoint, q, "json",
-		time.Duration(conf.QuadStore.OpenTimeout)*time.Millisecond,
-		time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond)
+	resp, err := repo.Query(conf.QuadStore.Endpoint, q, "json")
 	if err != nil {
 		errorHandler(w, r,
 			err.Error()+". Refresh to try again.\n\nYou can increase the timeout"+
@@ -131,6 +128,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
+	resp.Close()
 
 	if len(res.Results.Bindings) == 0 {
 		errorHandler(w, r, "This URI has no information", http.StatusNotFound)
@@ -142,9 +140,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// Fetch solution counts, if we hit the results limit
 		q := fmt.Sprintf(qCount, uri, uri)
 		// TODO use shorter timeouts? This is not vital information
-		resp, err := sparql.Query(conf.QuadStore.Endpoint, q, "json",
-			time.Duration(conf.QuadStore.OpenTimeout)*time.Millisecond,
-			time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond)
+		resp, err := repo.Query(conf.QuadStore.Endpoint, q, "json")
 		if err == nil {
 			_, err := sparql.ParseJSON(resp)
 			if err == nil {
@@ -153,7 +149,9 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				//maxS = res.Bindings()["maxS"][0].Value().(int)
 				//maxO = res.Bindings()["maxO"][0].Value().(int)
 			}
+			resp.Close()
 		}
+
 	}
 
 	solutions := res.Solutions()
@@ -218,14 +216,20 @@ func serveFile(filename string) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// init: load config.ini
-func init() {
+func main() {
+	// Load config file
 	if _, err := toml.DecodeFile("config.ini", &conf); err != nil {
 		log.Fatal("Couldn't parse config file: ", err)
 	}
-}
 
-func main() {
+	// Setup remote repository
+	repo = newRepo(
+		conf.QuadStore.Endpoint,
+		time.Duration(conf.QuadStore.OpenTimeout)*time.Millisecond,
+		time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond,
+	)
+
+	// HTTP routing
 	mux := http.NewServeMux()
 	var handler mainHandler
 	mux.HandleFunc("/robots.txt", serveFile("data/robots.txt"))

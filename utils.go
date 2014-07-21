@@ -3,11 +3,67 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"io"
+	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
+	"time"
 
-	"github.com/knakk/fenster/rdf"
+	"github.com/knakk/rdf"
+	"github.com/mreiferson/go-httpclient"
 )
+
+type remoteRepo struct {
+	endpoint string
+	client   *http.Client
+}
+
+func newRepo(endpoint string, openTimeout, readTimeout time.Duration) *remoteRepo {
+	transport := &httpclient.Transport{
+		ConnectTimeout:        openTimeout,
+		RequestTimeout:        openTimeout + readTimeout,
+		ResponseHeaderTimeout: readTimeout,
+	}
+	client := &http.Client{Transport: transport}
+	return &remoteRepo{endpoint: endpoint, client: client}
+}
+
+func (r *remoteRepo) Close() {
+	//r.client.Transport.Close()
+}
+
+// Query sends a request to a remote SPARQL endpoint and returns the unparsed
+// response body
+func (r *remoteRepo) Query(endpoint string, query string, format string) (io.ReadCloser, error) {
+	reqDefaults := url.Values{}
+	reqDefaults.Set("query", query)
+
+	switch format {
+	case "json":
+		reqDefaults.Set("format", "application/sparql-results+json")
+	case "rdf":
+		reqDefaults.Set("format", "application/x-trig")
+	default:
+		reqDefaults.Set("format", "application/sparql-results+json")
+	}
+
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s?%v", endpoint, reqDefaults.Encode()), nil)
+	if err != nil {
+		return nil, fmt.Errorf("error preparing http request: %v", err)
+	}
+
+	resp, err := r.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("http request failed with status code: %v", resp.StatusCode)
+	}
+
+	return resp.Body, nil
+}
 
 // prefixify returns the prefixed form of an URI if the prefix and namespaces
 // is found in the prefixes array, which must have the following form:
@@ -67,7 +123,7 @@ func findTitle(titlePredicates *[]string, rdfMap *[]map[string]rdf.Term) interfa
 	for _, m := range *rdfMap {
 		for _, p := range *titlePredicates {
 			if m["p"].String() == "<"+p+">" {
-				return m["o"].Value()
+				return m["o"].String()
 			}
 		}
 	}
