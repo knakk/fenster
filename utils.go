@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -55,11 +56,16 @@ func (r *remoteRepo) Query(endpoint string, query string, format string) (io.Rea
 
 	resp, err := r.client.Do(req)
 	if err != nil {
+		// trim URL from error message
+		i := strings.Index(err.Error(), "dial")
+		if i != -1 {
+			return nil, errors.New(err.Error()[i:])
+		}
 		return nil, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("http request failed with status code: %v", resp.StatusCode)
+		return nil, fmt.Errorf("SPARQL endpoint responded with HTTP status code: %v", resp.StatusCode)
 	}
 
 	return resp.Body, nil
