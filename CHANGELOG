@@ -1,5 +1,6 @@
 0.3   xx.xx.2014
 ==================================================
+* Support gzip-compression.
 * Optionally fetch resource literals on mouse hover.
 * Expose status and metrics in ./status endpoint.
 * Display total count of solutions on resource,

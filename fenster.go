@@ -13,9 +13,10 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
-	//"github.com/gorilla/handlers"
+	"github.com/gorilla/handlers"
 	"github.com/knakk/rdf"
 	"github.com/knakk/sparql"
+	"github.com/oxtoacart/bpool"
 	"github.com/rcrowley/go-metrics"
 )
 
@@ -49,6 +50,7 @@ var (
 	status    *appMetrics
 	qBank     sparql.Bank
 	suffixRg  = regexp.MustCompile(`\.[a-z1-9]+$`)
+	bufpool   *bpool.BufferPool
 )
 
 type mainHandler struct{}
@@ -129,7 +131,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// The URI should be an exlusive identifier of the resource; so we redirect
+	// The URI should be an exclusive identifier of the resource; so we redirect
 	// to URI+.html
 	if !resolved {
 		http.Redirect(w, r, r.URL.Path+".html", http.StatusFound)
@@ -214,15 +216,21 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		findImages(&solutions),
 	}
 
-	err = templates.ExecuteTemplate(w, "index.html", data)
+	buf := bufpool.Get()
+	defer bufpool.Put(buf)
+	err = templates.ExecuteTemplate(buf, "index.html", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	buf.WriteTo(w)
 }
 
 // errorHandler serves 40x & 50x error pages
 func errorHandler(w http.ResponseWriter, r *http.Request, msg string, status int) {
-	w.WriteHeader(status)
 	data := struct {
 		ErrorCode int
 		ErrorMsg  string
@@ -231,10 +239,17 @@ func errorHandler(w http.ResponseWriter, r *http.Request, msg string, status int
 		msg,
 	}
 
-	err := templates.ExecuteTemplate(w, "error.html", data)
+	buf := bufpool.Get()
+	defer bufpool.Put(buf)
+	err := templates.ExecuteTemplate(buf, "error.html", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(status)
+	buf.WriteTo(w)
 }
 
 // serveFile serves a single file from disk
@@ -283,6 +298,9 @@ func literalsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	// Init bufferpool, used for rendering templates
+	bufpool = bpool.NewBufferPool(48)
+
 	// Load config file
 	if _, err := toml.DecodeFile("config.ini", &conf); err != nil {
 		log.Fatal("Couldn't parse config file: ", err)
@@ -314,5 +332,5 @@ func main() {
 		metrics.DefaultRegistry))
 
 	fmt.Printf("Listening on port %d ...\n", conf.ServePort)
-	http.ListenAndServe(fmt.Sprintf(":%d", conf.ServePort), mux) //handlers.CompressHandler(mux))
+	http.ListenAndServe(fmt.Sprintf(":%d", conf.ServePort), handlers.CompressHandler(mux))
 }
