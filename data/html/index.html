@@ -93,7 +93,7 @@
           target.innerHTML = req.responseText;
           el.removeEventListener("mouseover", fetchLiterals);
         } else {
-          target.innerHTML = "error fetching resource literals";
+          target.innerHTML = "timeout/error fetching resource literals";
         }
       }
 
