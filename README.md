@@ -1,13 +1,13 @@
 ## Fenster
 Fenster is a fronted for RDF quad-stores.
 
+It is inspired by, and similar to [Pubby](http://wifo5-03.informatik.uni-mannheim.de/pubby/), but differs in that it shows triples from all public graphs, not just the default graph.
+
 Example of how a resolvable URI, [http://data.deichman.no/resource/tnr_1140686](http://data.deichman.no/resource/tnr_1140686), is presented in Fenster:
 ![screenshot](https://dl.dropboxusercontent.com/u/27551242/azur.png)
 
-It is inspired by, and similar to [Pubby](http://wifo5-03.informatik.uni-mannheim.de/pubby/), but differs in that it shows triples from all public graphs, not just the default graph.
-
 ### Status
-It's still a very young project, but considered stable. Fenster is allready used in production as a frontend for the [RDF-catalogue](http://data.deichman.no) of [Oslo public library](http://www.deichman.no)
+Fenster is stable and has been in production since November 2013 as a frontend for the [RDF-catalogue](http://data.deichman.no) of [Oslo public library](http://www.deichman.no). Currently it's only been tested against Virtuoso, but presumably any compliant SPARQL endpoint should work. Please let us know if you run into any issues.
 
 ### Deployment
 Fenster is written in Go, so you'll need the [Go toolchain](http://golang.org/doc/install) in order to build. It compiles to a statically linked binary, so deployment couldn't be simpler:
@@ -67,7 +67,3 @@ Here is an example Apache config, given Fenster running on localhost:8080 and SP
 
 ### License
 GPLv3
-
-### Todo
-* Logging
-* Test different SPARQL endpoints (currently only tested against Virtuoso)
