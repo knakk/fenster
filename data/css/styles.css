@@ -43,7 +43,7 @@ table th.sort-up:after { border-bottom:none; border-width:4px 4px 0; }
 table.preview tr { background-color: #fff !important;}
 .tooltip {
   position: absolute;
-  top: 1.5em;
+  top: 1.2em;
   left:3em;
   background: #fff;
   border: 1px solid #aaa;
@@ -51,8 +51,9 @@ table.preview tr { background-color: #fff !important;}
   display: none;
   z-index: 100;
   padding: 0.2em;
+  font-size: 90%;
 }
 
-.tooltip strong { display: block; border-bottom:; background: #eee; }
+.tooltip strong { display: block; border-bottom:; background: #d5d8e0; }
 .resource-link:hover + div { display: block; }
 .tooltip:hover { display: block };
