@@ -13,7 +13,7 @@ th { text-align: left; }
 table.quads { width:100%; table-layout: fixed; }
 table.quads thead { font-weight: bold }
 table.quads tr:nth-of-type(even) { background-color: #dadada; }
-table.quads td { padding: 4px 20px 4px 6px; word-wrap: break-word }
+table.quads td { padding: 4px 20px 4px 6px; word-wrap: break-word; position: relative; }
 th.td-graph { width: 15%; }
 th.td-pred { width: 20%; }
 div.clearfix { clear: both; }
@@ -24,3 +24,26 @@ footer { border:1px dashed #ccc; padding: 1em; }
 .th-header { position: relative; }
 .sorting-asc .th-header:after { position: absolute; right: 10px; content: '↓'; }
 .sorting-desc .th-header:after { position: absolute; right: 10px; content: '↑'; }
+
+table.preview tr { background-color: #fff !important;}
+.tooltip {
+  position: absolute;
+  top: 1.5em;
+  left:3em;
+  background: #fff;
+  border: 1px solid #aaa;
+  box-shadow: 3px 3px 10px #888;
+  display: none;
+  z-index: 100;
+  padding: 0.2em;
+}
+
+.tooltip strong {
+  display: block;
+  border-bottom: 1px solid #ddd;
+}
+
+.resource-link:hover + div {
+  display: block;
+}
+.tooltip:hover { display: block };

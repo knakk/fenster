@@ -103,7 +103,9 @@ func rejectWhereEmpty(key string, rdfMap *[]map[string]rdf.Term) *[]map[string]i
 			tm := make(map[string]interface{})
 			for k, v := range m {
 				if k != "g" && k != "p" && strings.HasPrefix(v.String(), "<"+conf.BaseURI) {
-					link := fmt.Sprintf("<a href='/%v'>%v</a>", v.String()[25:len(v.String())-1], template.HTMLEscapeString(v.String()))
+					link := fmt.Sprintf("<a class=\"resource-link\" href='/%v'>%v</a><div class=\"tooltip\"><strong>%s</strong><div class='literals'>...</div></div>",
+						v.String()[25:len(v.String())-1], template.HTMLEscapeString(v.String()), template.HTMLEscapeString(v.String()))
+					// TODO magic number 25 = len(conf.BaseURI)??
 					tm[k] = template.HTML(link)
 				} else {
 					if conf.Vocab.Enabled {

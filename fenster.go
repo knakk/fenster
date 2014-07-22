@@ -33,7 +33,13 @@ WHERE { GRAPH ?g { { <{{.URI}}> ?p ?o } UNION { ?s ?p <{{.URI}}> } } }
 
 # tag: construct
 CONSTRUCT { GRAPH ?g { <{{.URI}}> ?p ?o . ?s ?p <{{.URI}}> } }
-WHERE { GRAPH ?g { { <{{.URI}}> ?p ?o } UNION { ?s ?p <{{.URI}}> } } }`
+WHERE { GRAPH ?g { { <{{.URI}}> ?p ?o } UNION { ?s ?p <{{.URI}}> } } }
+
+#tag: literals
+SELECT DISTINCT ?p, ?o
+WHERE { <{{.URI}}> ?p ?o .
+        FILTER isLiteral(?o) }
+`
 )
 
 var (
@@ -163,7 +169,6 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if len(res.Results.Bindings) >= conf.QuadStore.ResultsLimit {
 		// Fetch solution counts, if we hit the results limit
 		q, _ := qBank.Prepare("count", struct{ URI string }{uri})
-		// TODO use shorter timeouts? This is not vital information
 		resp, err := repo.Query(conf.QuadStore.Endpoint, q, "json")
 		if err == nil {
 			res, err := sparql.ParseJSON(resp)
@@ -247,6 +252,36 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func literalsHandler(w http.ResponseWriter, r *http.Request) {
+	uri := r.FormValue("uri")
+	q, _ := qBank.Prepare("literals", struct{ URI string }{uri})
+	resp, err := repo.Query(conf.QuadStore.Endpoint, q, "json")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	res, err := sparql.ParseJSON(resp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Close()
+	if len(res.Results.Bindings) == 0 {
+		w.Write([]byte("No literals on resource"))
+		return
+	}
+
+	var b bytes.Buffer
+	b.WriteString("<table class='preview'>")
+	for _, s := range res.Solutions() {
+		b.WriteString("<tr><td>" + prefixify(&conf.Vocab.Dict, s["p"].String()) + "</td><td>")
+		b.WriteString(s["o"].String() + "</td></tr>")
+	}
+	b.WriteString("</table>")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Write(b.Bytes())
+}
+
 func main() {
 	// Load config file
 	if _, err := toml.DecodeFile("config.ini", &conf); err != nil {
@@ -273,6 +308,7 @@ func main() {
 	mux.HandleFunc("/css/styles.css", serveFile("data/css/styles.css"))
 	mux.HandleFunc("/favicon.ico", serveFile("data/favicon.ico"))
 	mux.HandleFunc("/.status", statusHandler)
+	mux.HandleFunc("/literals", literalsHandler)
 	mux.Handle("/", Timed(CountedByStatusXX(handler, "status", metrics.DefaultRegistry),
 		"responseTime",
 		metrics.DefaultRegistry))

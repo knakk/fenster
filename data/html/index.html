@@ -85,6 +85,37 @@ l);g=n.slice(0);for(h=c=0;h<f.length;h++)c=f[h],g[c]=n[h];f=d(g);a.children("tbo
         }
       });
     });
+
+    var fetchLiterals = function( event ) {
+      var el = event.target;
+      var uri = el.innerHTML.substr(4, el.innerHTML.length-8);
+      var target = el.nextSibling.querySelector(".literals");
+
+      req = new XMLHttpRequest();
+      req.open('GET','/literals?uri='+encodeURIComponent(uri), true);
+
+      req.onload = function() {
+        if (req.status == 200) {
+          target.innerHTML = req.responseText;
+          el.removeEventListener("mouseover", fetchLiterals);
+        } else {
+          target.innerHTML = "error fetching resource literals";
+        }
+      }
+
+      req.onerror = function() {
+          target.innerHTML = "server unavailable";
+          el.removeEventListener("mouseover", fetchLiterals);
+      };
+
+      req.send();
+    }
+    var resourceLinks = document.querySelectorAll(".resource-link");
+    Array.prototype.forEach.call(resourceLinks, function( el, i ) {
+      el.addEventListener("mouseover", fetchLiterals);
+    });
+
+
   </script>
   <footer>
     <p>Generated using the SPARQL endpoint at <a href="{{.Endpoint}}">http://data.deichman.no/sparql</a>. Get the raw data from this page as: <a href="{{.URI}}.json">JSON</a> or <a href="{{.URI}}.rdf">Turtle/TriG</a>.<br/> The data is licensed under <a href="{{.LicenseURL}}">{{.License}}</a>.</p>
