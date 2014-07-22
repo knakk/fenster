@@ -5,6 +5,7 @@ body { font-family: monospace; }
 h3 { background-color: #549908; padding: 3px; color: #fff; }
 .black { color: #000; }
 .gray  { color: #9a9a9a; }
+.relative { position: relative; }
 footer { padding: 2em; }
 #container { padding: 1em; }
 li.image { display:inline-block; margin: 2em; }
@@ -13,7 +14,7 @@ th { text-align: left; }
 table.quads { width:100%; table-layout: fixed; }
 table.quads thead { font-weight: bold }
 table.quads tr:nth-of-type(even) { background-color: #dadada; }
-table.quads td { padding: 4px 20px 4px 6px; word-wrap: break-word; position: relative; }
+table.quads td { padding: 4px 20px 4px 6px; word-wrap: break-word; }
 th.td-graph { width: 15%; }
 th.td-pred { width: 20%; }
 div.clearfix { clear: both; }
@@ -21,13 +22,9 @@ footer { border:1px dashed #ccc; padding: 1em; }
 .wordwrap { white-space: pre-wrap; white-space: -moz-pre-wrap; word-wrap: break-word; }
 .sortable { cursor: pointer; }
 
-th.sort-header {
-  cursor:pointer;
-  }
+th.sort-header { cursor:pointer; }
 th.sort-header::-moz-selection,
-th.sort-header::selection {
-  background:transparent;
-  }
+th.sort-header::selection { background:transparent; }
 table th.sort-header:after {
   content:'';
   float:right;
@@ -37,19 +34,11 @@ table th.sort-header:after {
   border-color:#404040 transparent;
   visibility:hidden;
   }
-table th.sort-header:hover:after {
-  visibility:visible;
-  }
+table th.sort-header:hover:after { visibility:visible; }
 table th.sort-up:after,
 table th.sort-down:after,
-table th.sort-down:hover:after {
-  visibility:visible;
-  opacity:0.4;
-  }
-table th.sort-up:after {
-  border-bottom:none;
-  border-width:4px 4px 0;
-  }
+table th.sort-down:hover:after { visibility:visible; opacity:0.4; }
+table th.sort-up:after { border-bottom:none; border-width:4px 4px 0; }
 
 table.preview tr { background-color: #fff !important;}
 .tooltip {
@@ -64,12 +53,6 @@ table.preview tr { background-color: #fff !important;}
   padding: 0.2em;
 }
 
-.tooltip strong {
-  display: block;
-  border-bottom: 1px solid #ddd;
-}
-
-.resource-link:hover + div {
-  display: block;
-}
+.tooltip strong { display: block; border-bottom:; background: #eee; }
+.resource-link:hover + div { display: block; }
 .tooltip:hover { display: block };

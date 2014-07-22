@@ -106,7 +106,7 @@ func rejectWhereEmpty(key string, rdfMap *[]map[string]rdf.Term) *[]map[string]i
 				if k != "g" && k != "p" && strings.HasPrefix(v.String(), "<"+conf.BaseURI) {
 					var link string
 					if conf.UI.FetchLiterals {
-						link = fmt.Sprintf("<a class=\"resource-link\" href='/%v'>%v</a><div class=\"tooltip\"><strong>%s</strong><div class='literals'>...</div></div>",
+						link = fmt.Sprintf("<div class='relative'><a class=\"resource-link\" href='/%v'>%v</a><div class=\"tooltip\"><strong>%s</strong><div class='literals'>...</div></div></div>",
 							v.String()[25:len(v.String())-1], template.HTMLEscapeString(v.String()), template.HTMLEscapeString(v.String()))
 					} else {
 						link = fmt.Sprintf("<a href='/%v'>%v</a>",
