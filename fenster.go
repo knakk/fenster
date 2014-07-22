@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
-	"github.com/gorilla/handlers"
+	//"github.com/gorilla/handlers"
 	"github.com/knakk/rdf"
 	"github.com/knakk/sparql"
 	"github.com/rcrowley/go-metrics"
@@ -122,9 +122,10 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	q := fmt.Sprintf(qSelect, uri, uri, conf.QuadStore.ResultsLimit)
 	resp, err := repo.Query(conf.QuadStore.Endpoint, q, "json")
 	if err != nil {
+		//println(err.Error())
 		errorHandler(w, r,
 			err.Error()+". Refresh to try again.\n\nYou can increase the timeout"+
-				"values in Fensters configuration file.", http.StatusInternalServerError)
+				" values in Fensters configuration file.", http.StatusInternalServerError)
 		return
 	}
 	defer resp.Close()
@@ -253,12 +254,10 @@ func main() {
 	mux.HandleFunc("/css/styles.css", serveFile("data/css/styles.css"))
 	mux.HandleFunc("/favicon.ico", serveFile("data/favicon.ico"))
 	mux.HandleFunc("/.status", statusHandler)
-	mux.Handle("/", handlers.CompressHandler(
-		Timed(
-			CountedByStatusXX(handler, "status", metrics.DefaultRegistry),
-			"responseTime",
-			metrics.DefaultRegistry)))
+	mux.Handle("/", Timed(CountedByStatusXX(handler, "status", metrics.DefaultRegistry),
+		"responseTime",
+		metrics.DefaultRegistry))
 
 	fmt.Printf("Listening on port %d ...\n", conf.ServePort)
-	http.ListenAndServe(fmt.Sprintf(":%d", conf.ServePort), mux)
+	http.ListenAndServe(fmt.Sprintf(":%d", conf.ServePort), mux) //handlers.CompressHandler(mux))
 }
