@@ -1,2 +1,10 @@
+0.3   xx.xx.2014
+==================================================
+* Optionally fetch resource literals on mouse hover.
+* Expose status and metrics in ./status endpoint.
+* Display total count of solutions on resource,
+  if larger than the number of solutions fetched.
+
 0.2   07.10.2013
-      First public release
+===================================================
+* First public release
