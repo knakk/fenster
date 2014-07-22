@@ -18,6 +18,7 @@ type quadStore struct {
 }
 
 type userInterface struct {
+	FetchLiterals   bool
 	ShowImages      bool
 	NumImages       int
 	ImagePredicates []string
