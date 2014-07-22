@@ -42,6 +42,7 @@ var (
 	repo      *remoteRepo
 	status    *appMetrics
 	qBank     sparql.Bank
+	suffixRg  = regexp.MustCompile(`\.[a-z1-9]+$`)
 )
 
 type mainHandler struct{}
@@ -101,7 +102,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	var uri string
 	resolved := false
-	suffix := regexp.MustCompile(`\.[a-z1-9]+$`).FindString(r.URL.Path)
+	suffix := suffixRg.FindString(r.URL.Path)
 
 	switch suffix {
 	case "":
