@@ -162,11 +162,7 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var maxS, maxO int
 	if len(res.Results.Bindings) >= conf.QuadStore.ResultsLimit {
 		// Fetch solution counts, if we hit the results limit
-		q, err := qBank.Prepare("count", struct{ URI string }{uri})
-		if err != nil {
-			println(err.Error())
-			return
-		}
+		q, _ := qBank.Prepare("count", struct{ URI string }{uri})
 		// TODO use shorter timeouts? This is not vital information
 		resp, err := repo.Query(conf.QuadStore.Endpoint, q, "json")
 		if err == nil {
