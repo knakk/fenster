@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -20,16 +21,19 @@ import (
 
 const (
 	version = "0.2"
-	qSelect = `
-		SELECT *
-		WHERE { GRAPH ?g { { <%s> ?p ?o } UNION { ?s ?p <%s> } } }
-		LIMIT %d`
-	qCount = `
-		SELECT COUNT(?s) AS ?maxO, COUNT(?o) as ?maxS
-		WHERE { GRAPH ?g { { <%s> ?p ?o } UNION { ?s ?p <%s> } } }`
-	qConstruct = `
-		CONSTRUCT { GRAPH ?g { <%s> ?p ?o . ?s ?p <%s> } }
-		WHERE { GRAPH ?g { { <%s> ?p ?o } UNION { ?s ?p <%s> } } }`
+	queries = `
+# tag: select
+SELECT *
+WHERE { GRAPH ?g { { <{{.URI}}> ?p ?o } UNION { ?s ?p <{{.URI}}> } } }
+LIMIT {{.Limit}}
+
+# tag: count
+SELECT COUNT(?s) AS ?maxO, COUNT(?o) as ?maxS
+WHERE { GRAPH ?g { { <{{.URI}}> ?p ?o } UNION { ?s ?p <{{.URI}}> } } }
+
+# tag: construct
+CONSTRUCT { GRAPH ?g { <{{.URI}}> ?p ?o . ?s ?p <{{.URI}}> } }
+WHERE { GRAPH ?g { { <{{.URI}}> ?p ?o } UNION { ?s ?p <{{.URI}}> } } }`
 )
 
 var (
@@ -37,6 +41,7 @@ var (
 	conf      Config
 	repo      *remoteRepo
 	status    *appMetrics
+	qBank     sparql.Bank
 )
 
 type mainHandler struct{}
@@ -46,8 +51,8 @@ type mainHandler struct{}
 func rdfHandler(w http.ResponseWriter, r *http.Request) {
 	uri := conf.BaseURI + strings.TrimSuffix(r.URL.Path, ".rdf")
 	format := "rdf"
-	q := fmt.Sprintf(qConstruct, uri, uri, uri, uri)
 
+	q, _ := qBank.Prepare("construct", struct{ URI string }{uri})
 	resp, err := repo.Query(conf.QuadStore.Endpoint, q, format)
 	if err != nil {
 		errorHandler(w, r, err.Error()+". Refresh to try again.\n\nYou can increase the timeout values in Fensters configuration file.", http.StatusInternalServerError)
@@ -63,8 +68,13 @@ func rdfHandler(w http.ResponseWriter, r *http.Request) {
 // the SPARQL endpoint
 func jsonHandler(w http.ResponseWriter, r *http.Request) {
 	uri := conf.BaseURI + strings.TrimSuffix(r.URL.Path, ".json")
-	q := fmt.Sprintf(qSelect, uri, uri, conf.QuadStore.ResultsLimit)
 	format := "json"
+
+	q, _ := qBank.Prepare("select",
+		struct {
+			URI   string
+			Limit int
+		}{uri, conf.QuadStore.ResultsLimit})
 
 	resp, err := repo.Query(conf.QuadStore.Endpoint, q, format)
 	if err != nil {
@@ -119,7 +129,12 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	q := fmt.Sprintf(qSelect, uri, uri, conf.QuadStore.ResultsLimit)
+	q, _ := qBank.Prepare("select",
+		struct {
+			URI   string
+			Limit int
+		}{uri, conf.QuadStore.ResultsLimit})
+
 	resp, err := repo.Query(conf.QuadStore.Endpoint, q, "json")
 	if err != nil {
 		//println(err.Error())
@@ -146,7 +161,11 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var maxS, maxO int
 	if len(res.Results.Bindings) >= conf.QuadStore.ResultsLimit {
 		// Fetch solution counts, if we hit the results limit
-		q := fmt.Sprintf(qCount, uri, uri)
+		q, err := qBank.Prepare("count", struct{ URI string }{uri})
+		if err != nil {
+			println(err.Error())
+			return
+		}
 		// TODO use shorter timeouts? This is not vital information
 		resp, err := repo.Query(conf.QuadStore.Endpoint, q, "json")
 		if err == nil {
@@ -243,6 +262,9 @@ func main() {
 		time.Duration(conf.QuadStore.OpenTimeout)*time.Millisecond,
 		time.Duration(conf.QuadStore.ReadTimeout)*time.Millisecond,
 	)
+
+	// Parse Query bank
+	qBank = sparql.LoadBank(bytes.NewBufferString(queries))
 
 	// Register metrics
 	status = registerMetrics()
