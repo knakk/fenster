@@ -255,6 +255,7 @@ func errorHandler(w http.ResponseWriter, r *http.Request, msg string, status int
 // serveFile serves a single file from disk
 func serveFile(filename string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Cache-Control", "max-age=2629743, public")
 		http.ServeFile(w, r, filename)
 	}
 }
