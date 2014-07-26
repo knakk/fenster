@@ -14,7 +14,7 @@
 <body>
 
   <div id="container">
-    {{if .Title}}
+    {{if ne .Title ""}}
       <h2 class="gray wordwrap">{{.Title}}</h2>
     {{end}}
     <h2 class="wordwrap">&lt;{{.URI}}&gt;</h2>

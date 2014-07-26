@@ -96,10 +96,10 @@ func prefixify(prefixes *[][]string, uri string) string {
 	return uriOriginal
 }
 
-func rejectWhereEmpty(key string, rdfMap *[]map[string]rdf.Term) *[]map[string]interface{} {
+func rejectWhereEmpty(key string, solutions []map[string]rdf.Term) []map[string]interface{} {
 	// TODO clean up this function; choose another name too..
 	included := make([]map[string]interface{}, 1)
-	for _, m := range *rdfMap {
+	for _, m := range solutions {
 		if m[key] != nil {
 			tm := make(map[string]interface{})
 			for k, v := range m {
@@ -126,34 +126,36 @@ func rejectWhereEmpty(key string, rdfMap *[]map[string]rdf.Term) *[]map[string]i
 			included = append(included, tm)
 		}
 	}
-	return &included
+	return included
 }
 
-// findTitle returns the first literal object of a collection of triples which
-// matches a prediate found in titlePredicates, or false if no match is found.
-func findTitle(titlePredicates *[]string, rdfMap *[]map[string]rdf.Term) interface{} {
-	if len(*titlePredicates) == 0 {
-		return false
+// findTitle iterates over solutions and returns the first literal string where the RDF
+// predicate matches any of the predicates in titlePredicates, or an empty string
+// if none is found.
+func findTitle(titlePredicates []string, solutions []map[string]rdf.Term) string {
+	if len(titlePredicates) == 0 {
+		return ""
 	}
 
-	for _, m := range *rdfMap {
-		for _, p := range *titlePredicates {
+	for _, m := range solutions {
+		for _, p := range titlePredicates {
 			if m["p"].String() == "<"+p+">" {
 				return m["o"].String()
 			}
 		}
 	}
-	return false
+	return ""
 }
 
-// findImages
-func findImages(rdfMap *[]map[string]rdf.Term) []string {
-	images := make([]string, 0)
+// findImages iterates over solutions and returns any images, that is,
+// objects where the predicate is one of the predicates slice.
+func findImages(predicates []string, solutions []map[string]rdf.Term) []string {
+	var images []string
 	if !conf.UI.ShowImages {
 		return images
 	}
-	for _, m := range *rdfMap {
-		for _, p := range conf.UI.ImagePredicates {
+	for _, m := range solutions {
+		for _, p := range predicates {
 			if m["p"].String() == "<"+p+">" {
 				images = append(images, strings.TrimSuffix(m["o"].String()[1:], ">"))
 				if len(images) == conf.UI.NumImages {

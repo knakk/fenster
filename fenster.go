@@ -185,22 +185,22 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	solutions := res.Solutions()
-	subj := rejectWhereEmpty("o", &solutions)
-	obj := rejectWhereEmpty("s", &solutions)
+	subj := rejectWhereEmpty("o", solutions)
+	obj := rejectWhereEmpty("s", solutions)
 	data := struct {
-		Title               interface{}
+		Title               string
 		License, LicenseURL string
 		Endpoint            string
 		Name, Version, URI  string
-		AsSubject           *[]map[string]interface{}
-		AsObject            *[]map[string]interface{}
+		AsSubject           []map[string]interface{}
+		AsObject            []map[string]interface{}
 		AsSubjectSize       int
 		AsObjectSize        int
 		MaxSubject          int
 		MaxObject           int
 		Images              []string
 	}{
-		findTitle(&conf.UI.TitlePredicates, &solutions),
+		findTitle(conf.UI.TitlePredicates, solutions),
 		conf.License,
 		conf.LicenseURL,
 		conf.QuadStore.Endpoint,
@@ -209,11 +209,11 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		uri,
 		subj,
 		obj,
-		len(*subj) - 1,
-		len(*obj) - 1,
+		len(subj) - 1,
+		len(obj) - 1,
 		maxS,
 		maxO,
-		findImages(&solutions),
+		findImages(conf.UI.ImagePredicates, solutions),
 	}
 
 	buf := bufpool.Get()
