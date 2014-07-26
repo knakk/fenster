@@ -1,4 +1,4 @@
-0.3   xx.xx.2014
+0.3   26.07.2014
 ==================================================
 * Support gzip-compression.
 * Optionally fetch resource literals on mouse hover.
