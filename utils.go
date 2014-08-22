@@ -103,23 +103,26 @@ func rejectWhereEmpty(key string, solutions []map[string]rdf.Term) []map[string]
 		if m[key] != nil {
 			tm := make(map[string]interface{})
 			for k, v := range m {
-				if k != "g" && k != "p" && strings.HasPrefix(v.String(), "<"+conf.BaseURI) {
-					var link string
+				var term string = v.String()
+				if k != "g" && k != "p" && strings.HasPrefix(term, "<"+conf.BaseURI) {
+
+					// URL without enclosing angle brackets
+					var link string = strings.Trim(term, "<>")
+
 					if conf.UI.FetchLiterals {
-						link = fmt.Sprintf("<div class='relative'><a class=\"resource-link\" href='/%v'>%v</a><div class=\"tooltip\"><strong>%s</strong><div class='literals'>...</div></div></div>",
-							v.String()[25:len(v.String())-1], template.HTMLEscapeString(v.String()), template.HTMLEscapeString(v.String()))
+						link = fmt.Sprintf("<div class='relative'><a class=\"resource-link\" href='%v'>%v</a><div class=\"tooltip\"><strong>%s</strong><div class='literals'>...</div></div></div>",
+							link, template.HTMLEscapeString(term), template.HTMLEscapeString(term))
 					} else {
-						link = fmt.Sprintf("<a href='/%v'>%v</a>",
-							v.String()[25:len(v.String())-1], template.HTMLEscapeString(v.String()))
+						link = fmt.Sprintf("<a href='%v'>%v</a>",
+							link, template.HTMLEscapeString(term))
 					}
 
-					// TODO magic number 25 = len(conf.BaseURI)??
 					tm[k] = template.HTML(link)
 				} else {
 					if conf.Vocab.Enabled {
-						tm[k] = prefixify(&conf.Vocab.Dict, v.String())
+						tm[k] = prefixify(&conf.Vocab.Dict, term)
 					} else {
-						tm[k] = v.String()
+						tm[k] = term
 					}
 				}
 			}
