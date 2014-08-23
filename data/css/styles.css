@@ -44,7 +44,7 @@ table.preview tr { background-color: #fff !important;}
 .tooltip {
   position: absolute;
   top: 1.2em;
-  left:3em;
+  left:10em;
   background: #fff;
   border: 1px solid #aaa;
   box-shadow: 3px 3px 10px #888;
