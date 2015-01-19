@@ -176,8 +176,8 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			res, err := sparql.ParseJSON(resp)
 			if err == nil {
 				b := res.Bindings()
-				maxS = b["maxS"][0].(*rdf.Literal).Value.(int)
-				maxO = b["maxO"][0].(*rdf.Literal).Value.(int)
+				maxS = b["maxS"][0].(*rdf.Literal).Value().(int)
+				maxO = b["maxO"][0].(*rdf.Literal).Value().(int)
 			}
 			resp.Close()
 		}
