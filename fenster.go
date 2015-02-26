@@ -176,8 +176,10 @@ func (m mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			res, err := sparql.ParseJSON(resp)
 			if err == nil {
 				b := res.Bindings()
-				maxS = b["maxS"][0].(*rdf.Literal).Value().(int)
-				maxO = b["maxO"][0].(*rdf.Literal).Value().(int)
+				v, _ := b["maxS"][0].(rdf.Literal).Typed()
+				maxS = v.(int)
+				v, _ = b["maxO"][0].(rdf.Literal).Typed()
+				maxO = v.(int)
 			}
 			resp.Close()
 		}
@@ -290,8 +292,8 @@ func literalsHandler(w http.ResponseWriter, r *http.Request) {
 	var b bytes.Buffer
 	b.WriteString("<table class='preview'>")
 	for _, s := range res.Solutions() {
-		b.WriteString("<tr><td>" + prefixify(&conf.Vocab.Dict, s["p"].String()) + "</td><td>")
-		b.WriteString(s["o"].String() + "</td></tr>")
+		b.WriteString("<tr><td>" + prefixify(&conf.Vocab.Dict, s["p"].Serialize(rdf.FormatTTL)) + "</td><td>")
+		b.WriteString(s["o"].Serialize(rdf.FormatTTL) + "</td></tr>")
 	}
 	b.WriteString("</table>")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -333,5 +335,8 @@ func main() {
 		metrics.DefaultRegistry))
 
 	fmt.Printf("Listening on port %d ...\n", conf.ServePort)
-	http.ListenAndServe(fmt.Sprintf(":%d", conf.ServePort), handlers.CompressHandler(mux))
+	err := http.ListenAndServe(fmt.Sprintf(":%d", conf.ServePort), handlers.CompressHandler(mux))
+	if err != nil {
+		log.Println(err)
+	}
 }

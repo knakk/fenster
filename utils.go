@@ -103,11 +103,11 @@ func rejectWhereEmpty(key string, solutions []map[string]rdf.Term) []map[string]
 		if m[key] != nil {
 			tm := make(map[string]interface{})
 			for k, v := range m {
-				var term string = v.String()
+				term := v.Serialize(rdf.FormatTTL)
 				if k != "g" && k != "p" && strings.HasPrefix(term, "<"+conf.BaseURI) {
 
 					// URL without enclosing angle brackets
-					var link string = strings.Trim(term, "<>")
+					link := strings.Trim(term, "<>")
 
 					if conf.UI.FetchLiterals {
 						link = fmt.Sprintf("<div class='relative'><a class=\"resource-link\" href='%v'>%v</a><div class=\"tooltip\"><strong>%s</strong><div class='literals'>...</div></div></div>",
@@ -142,8 +142,8 @@ func findTitle(titlePredicates []string, solutions []map[string]rdf.Term) string
 
 	for _, m := range solutions {
 		for _, p := range titlePredicates {
-			if m["p"].String() == "<"+p+">" {
-				return m["o"].String()
+			if m["p"].Serialize(rdf.FormatTTL) == "<"+p+">" {
+				return m["o"].Serialize(rdf.FormatTTL)
 			}
 		}
 	}
@@ -159,8 +159,8 @@ func findImages(predicates []string, solutions []map[string]rdf.Term) []string {
 	}
 	for _, m := range solutions {
 		for _, p := range predicates {
-			if m["p"].String() == "<"+p+">" {
-				images = append(images, strings.TrimSuffix(m["o"].String()[1:], ">"))
+			if m["p"].Serialize(rdf.FormatTTL) == "<"+p+">" {
+				images = append(images, strings.TrimSuffix(m["o"].Serialize(rdf.FormatTTL)[1:], ">"))
 				if len(images) == conf.UI.NumImages {
 					return images
 				}
