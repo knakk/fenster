@@ -292,8 +292,8 @@ func literalsHandler(w http.ResponseWriter, r *http.Request) {
 	var b bytes.Buffer
 	b.WriteString("<table class='preview'>")
 	for _, s := range res.Solutions() {
-		b.WriteString("<tr><td>" + prefixify(&conf.Vocab.Dict, s["p"].Serialize(rdf.FormatTTL)) + "</td><td>")
-		b.WriteString(s["o"].Serialize(rdf.FormatTTL) + "</td></tr>")
+		b.WriteString("<tr><td>" + prefixify(&conf.Vocab.Dict, s["p"].Serialize(rdf.Turtle)) + "</td><td>")
+		b.WriteString(s["o"].Serialize(rdf.Turtle) + "</td></tr>")
 	}
 	b.WriteString("</table>")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
